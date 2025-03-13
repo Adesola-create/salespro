@@ -28,7 +28,7 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
   String address = '';
   List<Map<String, dynamic>> payments = [];
 
-    BlueThermalPrinter bluetooth = BlueThermalPrinter.instance;
+  BlueThermalPrinter bluetooth = BlueThermalPrinter.instance;
   List<BluetoothDevice> _devices = [];
   BluetoothDevice? _selectedDevice;
   bool _connected = false;
@@ -41,14 +41,10 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
     loadPayment();
     sendPendingTransactions();
     _getBluetoothDevices();
+    
   }
 
-
-
-
-
-
- void _getBluetoothDevices() async {
+  void _getBluetoothDevices() async {
     try {
       List<BluetoothDevice> devices = await bluetooth.getBondedDevices();
       setState(() {
@@ -109,23 +105,19 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
   }
 
   /// Print sample text
-  void _print() {
-    if (!_connected) return;
-    bluetooth.printNewLine();
-    bluetooth.printCustom(
-      "Hello from BraveIQ! Make sure to download BraveIQ app from Play Store",
-      2,
-      1,
-    );
-    bluetooth.printNewLine();
-    bluetooth.printQRcode("https://livepetal.com", 200, 200, 1);
-    bluetooth.printNewLine();
-    bluetooth.printNewLine();
-  }
-
-
-
-
+  // void _print() {
+  //   if (!_connected) return;
+  //   bluetooth.printNewLine();
+  //   bluetooth.printCustom(
+  //     "Hello from BraveIQ! Make sure to download BraveIQ app from Play Store",
+  //     2,
+  //     1,
+  //   );
+  //   bluetooth.printNewLine();
+  //   bluetooth.printQRcode("https://livepetal.com", 200, 200, 1);
+  //   bluetooth.printNewLine();
+  //   bluetooth.printNewLine();
+  // }
 
   Future<void> loadLocalData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -135,6 +127,7 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
       services = prefs.getString('services') ?? '';
       address = prefs.getString('address') ?? '';
     });
+    //printReceipt();
   }
 
   void sendPendingTransactions() async {
@@ -209,13 +202,13 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
         title: Text('Receipt'),
         actions: [
           IconButton(
-              icon: Icon(Icons.settings),
-             onPressed: () {
+            icon: Icon(Icons.settings),
+            onPressed: () {
               setState(() {
                 _isVisible = false; // Toggle visibility
               });
             },
-            ),
+          ),
           ElevatedButton(
             onPressed: () {
               printReceipt();
@@ -243,96 +236,97 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-             Visibility(
-            visible: _isVisible || !_connected, // Show if _isVisible or _connected is false
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment
-                  .spaceEvenly, // Ensures equal spacing between the children
-              children: [
-                // Icon and Connection Status
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      icon: Icon(
-                        Icons.wifi, // Network icon
-                        color: _connected
-                            ? Colors.green
-                            : Colors
-                                .red, // Green if connected, red if disconnected
-                        size: 30, // Adjust size if needed
+            Visibility(
+              visible: _isVisible ||
+                  !_connected, // Show if _isVisible or _connected is false
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment
+                    .spaceEvenly, // Ensures equal spacing between the children
+                children: [
+                  // Icon and Connection Status
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          Icons.wifi, // Network icon
+                          color: _connected
+                              ? Colors.green
+                              : Colors
+                                  .red, // Green if connected, red if disconnected
+                          size: 30, // Adjust size if needed
+                        ),
+                        onPressed: _connect,
                       ),
-                      onPressed: _connect,
+                      Text(
+                        _connected ? "Connected" : "Disconnected", // Label text
+                        style: TextStyle(
+                          color: _connected
+                              ? Colors.green
+                              : Colors.red, // Same color as icon
+                          fontSize: 8, // Adjust font size
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  // Dropdown with border
+                  Container(
+                    // Removed the border property
+                    child: DropdownButton<BluetoothDevice>(
+                      hint: Text("Select Printer"),
+                      value: _selectedDevice,
+                      onChanged: (device) {
+                        setState(() {
+                          _selectedDevice = device;
+                        });
+                      },
+                      items: _devices.map((device) {
+                        return DropdownMenuItem(
+                          value: device,
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                                left: 16.0,
+                                top: 4.0,
+                                bottom: 4.0), // Reduced vertical padding
+                            child: Text(device.name ?? "Unknown"),
+                          ),
+                        );
+                      }).toList(),
                     ),
-                    Text(
-                      _connected ? "Connected" : "Disconnected", // Label text
+                  ),
+
+                  // Connect / Disconnect button
+                  ElevatedButton(
+                    onPressed: _connected ? _disconnect : _connect,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white, // Remove background color
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(12), // Rounded corners
+                        side: BorderSide(
+                            color: _connected
+                                ? Colors.red
+                                : Colors
+                                    .green), // Border color based on connection status
+                      ),
+                    ),
+                    child: Text(
+                      _connected ? "Disconnect" : "Connect",
                       style: TextStyle(
                         color: _connected
-                            ? Colors.green
-                            : Colors.red, // Same color as icon
-                        fontSize: 8, // Adjust font size
-                        fontWeight: FontWeight.bold,
+                            ? Colors.red
+                            : Colors.green, // Text color matching border
                       ),
                     ),
-                  ],
-                ),
-                // Dropdown with border
-                Container(
-                  // Removed the border property
-                  child: DropdownButton<BluetoothDevice>(
-                    hint: Text("Select Printer"),
-                    value: _selectedDevice,
-                    onChanged: (device) {
-                      setState(() {
-                        _selectedDevice = device;
-                      });
-                    },
-                    items: _devices.map((device) {
-                      return DropdownMenuItem(
-                        value: device,
-                        child: Padding(
-                          padding: EdgeInsets.only(
-                              left: 16.0,
-                              top: 4.0,
-                              bottom: 4.0), // Reduced vertical padding
-                          child: Text(device.name ?? "Unknown"),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
-
-                // Connect / Disconnect button
-                ElevatedButton(
-                  onPressed: _connected ? _disconnect : _connect,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white, // Remove background color
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(12), // Rounded corners
-                      side: BorderSide(
-                          color: _connected
-                              ? Colors.red
-                              : Colors
-                                  .green), // Border color based on connection status
-                    ),
-                  ),
-                  child: Text(
-                    _connected ? "Disconnect" : "Connect",
-                    style: TextStyle(
-                      color: _connected
-                          ? Colors.red
-                          : Colors.green, // Text color matching border
-                    ),
-                  ),
-                )
-              ],
+                  )
+                ],
+              ),
             ),
-        ),
-        ElevatedButton(
-              onPressed: _print,
-              child: Text("Print Sample"),
-            ),
+            // ElevatedButton(
+            //       onPressed: _print,
+            //       child: Text("Print Sample"),
+            //     ),
             Center(
               child: Text(business,
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
@@ -346,18 +340,18 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
             ),
             SizedBox(height: 20),
             Text('Customer: ${widget.salesLog['name']}',
-                style: TextStyle(fontSize: 16)),
+                style: TextStyle(fontSize: 14)),
             Text(
               'Date: ${DateTime.parse(widget.salesLog['timestamp']).toLocal().toString().substring(0, 16)}',
-              style: TextStyle(fontSize: 16),
+              style: TextStyle(fontSize: 14),
             ),
             Text('salesID: ${widget.salesLog['salesID']}',
-                style: TextStyle(fontSize: 16)),
+                style: TextStyle(fontSize: 14)),
             Text(
                 'Payment Method: ${getPaymentTitleById(widget.salesLog['payMethod'])}',
-                style: TextStyle(fontSize: 16)),
+                style: TextStyle(fontSize: 14)),
             Text('Served by: ${widget.salesLog['servedBy']}',
-                style: TextStyle(fontSize: 16)),
+                style: TextStyle(fontSize: 14)),
             SizedBox(height: 20),
             Column(
               children: [
@@ -366,11 +360,11 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
                   dense: true, // Reduce tile height
                   leading: Text(
                     'Qty',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   title: Text(
                     'Item',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min, // Eliminate extra spacing
@@ -378,14 +372,14 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
                       Text(
                         'Price',
                         style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                            fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(
                           width: 5), // Minimal space between price and amount
                       Text(
                         'Amount',
                         style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                            fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -403,17 +397,17 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
                       contentPadding: EdgeInsets.zero, // Remove padding
                       dense: true, // Reduce height
                       leading: Text('${item['qty']}',
-                          style: TextStyle(fontSize: 16)),
+                          style: TextStyle(fontSize: 14)),
                       title:
-                          Text(item['title'], style: TextStyle(fontSize: 16)),
+                          Text(item['title'], style: TextStyle(fontSize: 14)),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min, // No extra spacing
                         children: [
                           Text('₦${formatNumber(item['price'])}',
-                              style: TextStyle(fontSize: 16)),
+                              style: TextStyle(fontSize: 14)),
                           SizedBox(width: 16),
                           Text('₦${formatNumber(item['amount'])}',
-                              style: TextStyle(fontSize: 16)),
+                              style: TextStyle(fontSize: 14)),
                         ],
                       ),
                     );
@@ -428,12 +422,12 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
                       Text(
                         'Grand Total:',
                         style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                            fontSize: 14, fontWeight: FontWeight.bold),
                       ),
                       Text(
                         '₦${formatNumber(total)}',
                         style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                            fontSize: 14, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -451,60 +445,64 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
     );
   }
 
-void printReceipt() async {
-  // List<BluetoothDevice> devices = await bluetooth.getBondedDevices();
-  // if (devices.isEmpty) {
-  //   print("No paired Bluetooth devices found.");
-  //   return;
-  // }
+  void printReceipt() async {
+    // List<BluetoothDevice> devices = await bluetooth.getBondedDevices();
+    // if (devices.isEmpty) {
+    //   print("No paired Bluetooth devices found.");
+    //   return;
+    // }
 
-  // Select the first available Bluetooth printer
-  // BluetoothDevice device = devices.first;
-  // await bluetooth.connect(device);
+    // Select the first available Bluetooth printer
+    // BluetoothDevice device = devices.first;
+    // await bluetooth.connect(device);
 
-  bluetooth.printNewLine();
-  bluetooth.printCustom(business, 2, 1); // Business name, bold size
-  bluetooth.printCustom('($services)', 1, 1);
-  bluetooth.printCustom(address, 1, 1);
-  bluetooth.printNewLine();
+    bluetooth.printCustom(business, 1, 1); // Business name, bold size
+    //bluetooth.printCustom('($services)', 0, 1);
+    bluetooth.printCustom(address, 0, 1);
+    bluetooth.printNewLine();
 
-  // Customer Info
-  bluetooth.printLeftRight("Customer:", widget.salesLog['name'], 1);
-  bluetooth.printLeftRight("Date:", DateTime.parse(widget.salesLog['timestamp'])
-      .toLocal()
-      .toString()
-      .substring(0, 16), 1);
-  bluetooth.printLeftRight("Sales ID:", widget.salesLog['salesID'], 1);
-  bluetooth.printLeftRight("Served by:", widget.salesLog['servedBy'], 1);
-  bluetooth.printNewLine();
+    // Customer Info
+    bluetooth.printCustom("Customer: ${widget.salesLog['name']}", 0, 0);
+    bluetooth.printCustom(
+        'Date: ${DateTime.parse(widget.salesLog['timestamp']).toLocal().toString().substring(0, 16)}',
+        0,
+        0);
+    bluetooth.printCustom("Sales ID: ${widget.salesLog['salesID']}", 0, 0);
+    bluetooth.printCustom("Served by:  ${widget.salesLog['servedBy']}", 0, 0);
 
-  // Table Header
-  bluetooth.printCustom("Qty  Item           Price  Amount", 1, 0);
-  bluetooth.printCustom("--------------------------------", 1, 0);
+    bluetooth.printCustom("--------------------------------", 0, 1);
 
-  // Items
-  for (var item in cart) {
-    String qty = '${item['qty']}';
-    String title = item['title'].length > 12 ? item['title'].substring(0, 12) : item['title'];
-    String price = 'N${formatNumber(item['price'])}';
-    String amount = 'N${formatNumber(item['amount'])}';
+    // Table Header
+    bluetooth.printCustom("Qty Item           Price Amount", 0, 1);
+    bluetooth.printCustom("--------------------------------", 0, 1);
 
-    bluetooth.printLeftRight("$qty  $title", "$price  $amount", 1);
+    // Items
+    for (var item in cart) {
+      String qty = '${item['qty']}';
+      String title = item['title'].length > 12
+          ? item['title'].substring(0, 12)
+          : item['title'];
+      String price = '${formatNumber(item['price'])}';
+      String amount = '${formatNumber(item['amount'])}';
+
+      bluetooth.printLeftRight("$qty  $title", "$price  $amount", 0);
+    }
+    bluetooth.printCustom("--------------------------------", 0, 1);
+
+    // Grand Total
+
+    bluetooth.printLeftRight(
+        "Grand Total:",
+        'N${formatNumber(cart.fold(0, (sum, item) => sum + (item['amount'] ?? 0)))}',
+        1);
+
+    bluetooth.printCustom("--------------------------------", 0, 1);
+
+    // Footer
+    bluetooth.printCustom("Thank you for your patronage!", 0, 1);
+    bluetooth.printCustom("Powered by www.livepetal.com", 0, 1);
+
+    // Cut paper
+    bluetooth.paperCut();
   }
-
-  // Grand Total
-  bluetooth.printNewLine();
-  bluetooth.printLeftRight("Grand Total:", 'N${formatNumber(cart.fold(0, (sum, item) => sum + (item['amount'] ?? 0)))}', 2);
-  bluetooth.printNewLine();
-
-  // Footer
-  bluetooth.printCustom("Thank you for your patronage!", 1, 1);
-  bluetooth.printCustom("Powered By: www.livepetal.com", 0, 1);
-  bluetooth.printNewLine();
-  bluetooth.printNewLine();
-
-  // Cut paper
-  bluetooth.paperCut();
-}
-
 }
