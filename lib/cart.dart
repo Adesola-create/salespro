@@ -898,7 +898,7 @@ class _POSHomePageState extends State<POSHomePage> {
                         ),
                       ),
                       child: Text(
-                        'Process Transaction',
+                        'Complete Transaction',
                         style: TextStyle(
                           fontSize: 18,
                           color: Colors.white,

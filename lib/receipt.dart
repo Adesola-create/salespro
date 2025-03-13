@@ -3,11 +3,13 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:pdf/pdf.dart';
+//import 'package:pdf/pdf.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:printing/printing.dart';
-import 'package:pdf/widgets.dart' as pw;
+//import 'package:printing/printing.dart';
+//import 'package:pdf/widgets.dart' as pw;
 import 'package:http/http.dart' as http;
+import 'package:blue_thermal_printer/blue_thermal_printer.dart';
+//import 'package:esc_pos_utils/esc_pos_utils.dart';
 
 class ReceiptScreen extends StatefulWidget {
   final Map<String, dynamic> salesLog;
@@ -26,6 +28,11 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
   String address = '';
   List<Map<String, dynamic>> payments = [];
 
+    BlueThermalPrinter bluetooth = BlueThermalPrinter.instance;
+  List<BluetoothDevice> _devices = [];
+  BluetoothDevice? _selectedDevice;
+  bool _connected = false;
+  bool _isVisible = false;
 
   @override
   void initState() {
@@ -33,7 +40,92 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
     loadLocalData();
     loadPayment();
     sendPendingTransactions();
+    _getBluetoothDevices();
   }
+
+
+
+
+
+
+ void _getBluetoothDevices() async {
+    try {
+      List<BluetoothDevice> devices = await bluetooth.getBondedDevices();
+      setState(() {
+        _devices = devices;
+      });
+
+      // Try to auto-connect to the saved printer
+      _autoConnect();
+    } catch (e) {
+      print("Error getting Bluetooth devices: $e");
+    }
+  }
+
+  /// Auto-connect to the last selected printer
+  void _autoConnect() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? savedAddress = prefs.getString('printer_address');
+
+    if (savedAddress != null) {
+      BluetoothDevice? savedDevice =
+          _devices.firstWhere((d) => d.address == savedAddress);
+
+      setState(() {
+        _selectedDevice = savedDevice;
+      });
+      _disconnect();
+    }
+  }
+
+  /// Connect to selected Bluetooth printer
+  void _connect({bool auto = false}) async {
+    if (_selectedDevice == null) return;
+    try {
+      bool? isConnected = await bluetooth.connect(_selectedDevice!);
+      if (isConnected == true) {
+        setState(() {
+          _connected = true;
+        });
+
+        // Save the selected printer address
+        if (!auto) {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          prefs.setString('printer_address', _selectedDevice!.address ?? '');
+        }
+      }
+    } catch (e) {
+      print("Connection error: $e");
+    }
+  }
+
+  /// Disconnect Bluetooth printer
+  void _disconnect() async {
+    await bluetooth.disconnect();
+    setState(() {
+      _connected = false;
+    });
+    _connect(auto: true);
+  }
+
+  /// Print sample text
+  void _print() {
+    if (!_connected) return;
+    bluetooth.printNewLine();
+    bluetooth.printCustom(
+      "Hello from BraveIQ! Make sure to download BraveIQ app from Play Store",
+      2,
+      1,
+    );
+    bluetooth.printNewLine();
+    bluetooth.printQRcode("https://livepetal.com", 200, 200, 1);
+    bluetooth.printNewLine();
+    bluetooth.printNewLine();
+  }
+
+
+
+
 
   Future<void> loadLocalData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -114,8 +206,16 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Customer Receipt'),
+        title: Text('Receipt'),
         actions: [
+          IconButton(
+              icon: Icon(Icons.settings),
+             onPressed: () {
+              setState(() {
+                _isVisible = false; // Toggle visibility
+              });
+            },
+            ),
           ElevatedButton(
             onPressed: () {
               printReceipt();
@@ -143,6 +243,96 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+             Visibility(
+            visible: _isVisible || !_connected, // Show if _isVisible or _connected is false
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment
+                  .spaceEvenly, // Ensures equal spacing between the children
+              children: [
+                // Icon and Connection Status
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      icon: Icon(
+                        Icons.wifi, // Network icon
+                        color: _connected
+                            ? Colors.green
+                            : Colors
+                                .red, // Green if connected, red if disconnected
+                        size: 30, // Adjust size if needed
+                      ),
+                      onPressed: _connect,
+                    ),
+                    Text(
+                      _connected ? "Connected" : "Disconnected", // Label text
+                      style: TextStyle(
+                        color: _connected
+                            ? Colors.green
+                            : Colors.red, // Same color as icon
+                        fontSize: 8, // Adjust font size
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                // Dropdown with border
+                Container(
+                  // Removed the border property
+                  child: DropdownButton<BluetoothDevice>(
+                    hint: Text("Select Printer"),
+                    value: _selectedDevice,
+                    onChanged: (device) {
+                      setState(() {
+                        _selectedDevice = device;
+                      });
+                    },
+                    items: _devices.map((device) {
+                      return DropdownMenuItem(
+                        value: device,
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                              left: 16.0,
+                              top: 4.0,
+                              bottom: 4.0), // Reduced vertical padding
+                          child: Text(device.name ?? "Unknown"),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+
+                // Connect / Disconnect button
+                ElevatedButton(
+                  onPressed: _connected ? _disconnect : _connect,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white, // Remove background color
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(12), // Rounded corners
+                      side: BorderSide(
+                          color: _connected
+                              ? Colors.red
+                              : Colors
+                                  .green), // Border color based on connection status
+                    ),
+                  ),
+                  child: Text(
+                    _connected ? "Disconnect" : "Connect",
+                    style: TextStyle(
+                      color: _connected
+                          ? Colors.red
+                          : Colors.green, // Text color matching border
+                    ),
+                  ),
+                )
+              ],
+            ),
+        ),
+        ElevatedButton(
+              onPressed: _print,
+              child: Text("Print Sample"),
+            ),
             Center(
               child: Text(business,
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
@@ -261,132 +451,60 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
     );
   }
 
-  //import 'package:pdf/pdf.dart'; // Ensure this is imported
+void printReceipt() async {
+  // List<BluetoothDevice> devices = await bluetooth.getBondedDevices();
+  // if (devices.isEmpty) {
+  //   print("No paired Bluetooth devices found.");
+  //   return;
+  // }
 
-  void printReceipt() async {
-    final pdf = pw.Document();
+  // Select the first available Bluetooth printer
+  // BluetoothDevice device = devices.first;
+  // await bluetooth.connect(device);
 
-    pdf.addPage(
-      pw.Page(
-        pageFormat: PdfPageFormat.roll80, // Optimized for receipt printers
-        build: (pw.Context context) => pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            // Business Information
-            pw.Center(
-              child: pw.Text(business,
-                  style: pw.TextStyle(
-                      fontSize: 16, fontWeight: pw.FontWeight.bold)),
-            ),
-            pw.Center(
-              child: pw.Text('($services)', style: pw.TextStyle(fontSize: 12)),
-            ),
-            pw.Center(
-              child: pw.Text(address, style: pw.TextStyle(fontSize: 12)),
-            ),
-            pw.SizedBox(height: 10),
+  bluetooth.printNewLine();
+  bluetooth.printCustom(business, 2, 1); // Business name, bold size
+  bluetooth.printCustom('($services)', 1, 1);
+  bluetooth.printCustom(address, 1, 1);
+  bluetooth.printNewLine();
 
-            // Customer Info
-            pw.Text('Customer: ${widget.salesLog['name']}',
-                style: pw.TextStyle(fontSize: 12)),
-            pw.Text(
-              'Date: ${DateTime.parse(widget.salesLog['timestamp']).toLocal().toString().substring(0, 16)}',
-              style: pw.TextStyle(fontSize: 12),
-            ),
-            pw.Text('Sales ID: ${widget.salesLog['salesID']}',
-                style: pw.TextStyle(fontSize: 12)),
-            pw.Text('Served by: ${widget.salesLog['servedBy']}',
-                style: pw.TextStyle(fontSize: 12)),
-            pw.SizedBox(height: 10),
+  // Customer Info
+  bluetooth.printLeftRight("Customer:", widget.salesLog['name'], 1);
+  bluetooth.printLeftRight("Date:", DateTime.parse(widget.salesLog['timestamp'])
+      .toLocal()
+      .toString()
+      .substring(0, 16), 1);
+  bluetooth.printLeftRight("Sales ID:", widget.salesLog['salesID'], 1);
+  bluetooth.printLeftRight("Served by:", widget.salesLog['servedBy'], 1);
+  bluetooth.printNewLine();
 
-            // Table Header
-            pw.Container(
-              padding: pw.EdgeInsets.symmetric(vertical: 4),
-              decoration: pw.BoxDecoration(
-                  border: pw.Border(bottom: pw.BorderSide(width: 1))),
-              child: pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                children: [
-                  pw.Text('Qty ',
-                      style: pw.TextStyle(
-                          fontSize: 10, fontWeight: pw.FontWeight.bold)),
-                  pw.Expanded(
-                    child: pw.Text('Item',
-                        style: pw.TextStyle(
-                            fontSize: 10, fontWeight: pw.FontWeight.bold)),
-                  ),
-                  pw.Text('Price  ',
-                      style: pw.TextStyle(
-                          fontSize: 10, fontWeight: pw.FontWeight.bold)),
-                  pw.Text('Amount',
-                      style: pw.TextStyle(
-                          fontSize: 10, fontWeight: pw.FontWeight.bold)),
-                ],
-              ),
-            ),
+  // Table Header
+  bluetooth.printCustom("Qty  Item           Price  Amount", 1, 0);
+  bluetooth.printCustom("--------------------------------", 1, 0);
 
-            // Table Rows for Items
-            ...cart.map((item) => pw.Container(
-                  padding: pw.EdgeInsets.symmetric(vertical: 3),
-                  decoration: pw.BoxDecoration(
-                      border: pw.Border(bottom: pw.BorderSide(width: 0.5))),
-                  child: pw.Row(
-                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                    children: [
-                      pw.Text('${item['qty']}  ',
-                          style: pw.TextStyle(fontSize: 12)),
-                      pw.Expanded(
-                        child: pw.Text(item['title'],
-                            style: pw.TextStyle(fontSize: 12)),
-                      ),
-                      pw.Text('N${formatNumber(item['price'])} ',
-                          style: pw.TextStyle(fontSize: 12)),
-                      pw.Text(' N${formatNumber(item['amount'])}',
-                          style: pw.TextStyle(fontSize: 12)),
-                    ],
-                  ),
-                )),
+  // Items
+  for (var item in cart) {
+    String qty = '${item['qty']}';
+    String title = item['title'].length > 12 ? item['title'].substring(0, 12) : item['title'];
+    String price = 'N${formatNumber(item['price'])}';
+    String amount = 'N${formatNumber(item['amount'])}';
 
-            // Grand Total
-            pw.SizedBox(height: 8),
-            pw.Container(
-              padding: pw.EdgeInsets.all(4),
-              decoration: pw.BoxDecoration(
-                border: pw.Border(
-                    top: pw.BorderSide(width: 1),
-                    bottom: pw.BorderSide(width: 1)),
-              ),
-              child: pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                children: [
-                  pw.Text('Grand Total:',
-                      style: pw.TextStyle(
-                          fontSize: 14, fontWeight: pw.FontWeight.bold)),
-                  pw.Text(
-                      'N${formatNumber(cart.fold(0, (sum, item) => sum + (item['amount'] ?? 0)))}',
-                      style: pw.TextStyle(
-                          fontSize: 14, fontWeight: pw.FontWeight.bold)),
-                ],
-              ),
-            ),
-
-            pw.SizedBox(height: 10),
-            pw.Center(
-              child: pw.Text('Thank you for your patronage!',
-                  style: pw.TextStyle(fontSize: 14)),
-            ),
-            pw.SizedBox(height: 20),
-            pw.Center(
-              child: pw.Text('Powered By: www.livepetal.com',
-                  style: pw.TextStyle(fontSize: 10)),
-            ),
-          ],
-        ),
-      ),
-    );
-
-    await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => pdf.save(),
-    );
+    bluetooth.printLeftRight("$qty  $title", "$price  $amount", 1);
   }
+
+  // Grand Total
+  bluetooth.printNewLine();
+  bluetooth.printLeftRight("Grand Total:", 'N${formatNumber(cart.fold(0, (sum, item) => sum + (item['amount'] ?? 0)))}', 2);
+  bluetooth.printNewLine();
+
+  // Footer
+  bluetooth.printCustom("Thank you for your patronage!", 1, 1);
+  bluetooth.printCustom("Powered By: www.livepetal.com", 0, 1);
+  bluetooth.printNewLine();
+  bluetooth.printNewLine();
+
+  // Cut paper
+  bluetooth.paperCut();
+}
+
 }
