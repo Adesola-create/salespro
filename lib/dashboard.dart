@@ -249,13 +249,13 @@ String formatNumber(num amount) {
                     children: [
                       // Search Bar
                       Padding(
-                        padding: const EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(12.0),
                         child: TextField(
                           controller: searchController,
                           decoration: InputDecoration(
                             hintText: "Search your cravings...",
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(15.0),
+                              borderRadius: BorderRadius.circular(24.0),
                               borderSide: BorderSide(color: primaryColor),
                             ),
                             prefixIcon: Icon(Icons.search),
@@ -265,7 +265,7 @@ String formatNumber(num amount) {
 
                       // Display grouped items
                      Padding(
-  padding: const EdgeInsets.all(16.0),
+  padding: const EdgeInsets.all(12.0),
   child: Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: groupedItems.entries.map((entry) {

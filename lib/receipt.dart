@@ -340,18 +340,18 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
             ),
             SizedBox(height: 20),
             Text('Customer: ${widget.salesLog['name']}',
-                style: TextStyle(fontSize: 14)),
+                style: TextStyle(fontSize: 16)),
             Text(
               'Date: ${DateTime.parse(widget.salesLog['timestamp']).toLocal().toString().substring(0, 16)}',
-              style: TextStyle(fontSize: 14),
+              style: TextStyle(fontSize: 16),
             ),
             Text('salesID: ${widget.salesLog['salesID']}',
-                style: TextStyle(fontSize: 14)),
+                style: TextStyle(fontSize: 16)),
             Text(
                 'Payment Method: ${getPaymentTitleById(widget.salesLog['payMethod'])}',
-                style: TextStyle(fontSize: 14)),
+                style: TextStyle(fontSize: 16)),
             Text('Served by: ${widget.salesLog['servedBy']}',
-                style: TextStyle(fontSize: 14)),
+                style: TextStyle(fontSize: 16)),
             SizedBox(height: 20),
             Column(
               children: [
@@ -397,17 +397,17 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
                       contentPadding: EdgeInsets.zero, // Remove padding
                       dense: true, // Reduce height
                       leading: Text('${item['qty']}',
-                          style: TextStyle(fontSize: 14)),
+                          style: TextStyle(fontSize: 16)),
                       title:
-                          Text(item['title'], style: TextStyle(fontSize: 14)),
+                          Text(item['title'], style: TextStyle(fontSize: 16)),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min, // No extra spacing
                         children: [
                           Text('₦${formatNumber(item['price'])}',
-                              style: TextStyle(fontSize: 14)),
+                              style: TextStyle(fontSize: 16)),
                           SizedBox(width: 16),
                           Text('₦${formatNumber(item['amount'])}',
-                              style: TextStyle(fontSize: 14)),
+                              style: TextStyle(fontSize: 16)),
                         ],
                       ),
                     );
@@ -422,12 +422,12 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
                       Text(
                         'Grand Total:',
                         style: TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.bold),
+                            fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                       Text(
                         '₦${formatNumber(total)}',
                         style: TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.bold),
+                            fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),

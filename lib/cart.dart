@@ -88,6 +88,9 @@ class _POSHomePageState extends State<POSHomePage> {
   }
 
   Future<void> _addCustomer(String name, String phone) async {
+    if (name.isEmpty) {
+      return;
+    }
     setState(() {
       customers.add({'name': name, 'phone': phone, 'sent': 'false'});
     });
@@ -925,8 +928,6 @@ class _POSHomePageState extends State<POSHomePage> {
 
 // Function to show top modal for adding a new customer
   void _showAddCustomerModal(BuildContext context) {
-    String initialName = "";
-    String initialPhone = "";
     TextEditingController nameController = TextEditingController(text: name);
     TextEditingController phoneController = TextEditingController(text: phone);
 
@@ -965,7 +966,7 @@ class _POSHomePageState extends State<POSHomePage> {
                     controller: nameController,
                     decoration: InputDecoration(labelText: 'Name'),
                     onChanged: (value) {
-                      initialName = value;
+                      name = value;
                     },
                   ),
                   TextField(
@@ -973,7 +974,7 @@ class _POSHomePageState extends State<POSHomePage> {
                     decoration: InputDecoration(labelText: 'Phone Number'),
                     keyboardType: TextInputType.number,
                     onChanged: (value) {
-                      initialPhone = value;
+                      phone = value;
                     },
                   ),
                   SizedBox(height: 20),
@@ -990,15 +991,12 @@ class _POSHomePageState extends State<POSHomePage> {
                       TextButton(
                         onPressed: () {
                           // Handle saving the new customer information
-                          if (initialName.isNotEmpty &&
-                              initialPhone.isNotEmpty) {
-                            _addCustomer(initialName, initialPhone);
-                          } else {
-                            initialName = 'Customer';
-                          }
+
+                          _addCustomer(name, phone);
+
                           setState(() {
-                            name = initialName;
-                            phone = initialPhone;
+                            name = name;
+                            phone = phone;
                           });
                           Navigator.of(context).pop();
                         },
@@ -1142,11 +1140,11 @@ class ProductSearch extends SearchDelegate<Map<String, dynamic>> {
   ProductSearch(
       {required this.products, required this.addToCart, required this.cart});
 
-
-String formatNumber(num amount) {
+  String formatNumber(num amount) {
     final formatter = NumberFormat('#,###', 'en_US');
     return formatter.format(amount);
   }
+
   @override
   List<Widget> buildActions(BuildContext context) {
     return [
@@ -1278,10 +1276,14 @@ String formatNumber(num amount) {
 class CustomerSearchPage extends StatefulWidget {
   final String newName;
   final String newPhone;
-
   final Function addName;
-  CustomerSearchPage(
-      {required this.newName, required this.newPhone, required this.addName});
+
+  CustomerSearchPage({
+    required this.newName,
+    required this.newPhone,
+    required this.addName,
+  });
+
   @override
   _CustomerSearchPageState createState() => _CustomerSearchPageState();
 }
@@ -1290,8 +1292,6 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
   List<Map<String, String>> customers = [];
   List<Map<String, String>> filteredCustomers = [];
   String searchQuery = '';
-  String name = '';
-  String phone = '';
 
   @override
   void initState() {
@@ -1328,7 +1328,7 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Customer Search'),
+        title: Text('Search Customer'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -1337,7 +1337,9 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
             TextField(
               decoration: InputDecoration(
                 labelText: 'Enter Customer Name or Phone',
-                border: OutlineInputBorder(),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(18.0),
+                ),
               ),
               onChanged: _filterCustomers,
             ),
@@ -1364,11 +1366,8 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
                                 duration: Duration(seconds: 2),
                               ),
                             );
-                            addName(customer['name'],customer['phone']);
-                            // setState(() {
-                            //   name = customer['name'] ?? '';
-                            //   phone = customer['phone'] ?? '';
-                            // });
+
+                            widget.addName(customer['name'], customer['phone']);
                             Navigator.of(context)
                                 .pop(); // Close modal on selection
                           },
@@ -1385,11 +1384,4 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
       ),
     );
   }
-  void addName(newName, newPhone) {
-    setState(() {
-      name = newName;
-      phone = newPhone;
-    });
-  }
-
 }

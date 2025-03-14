@@ -17,19 +17,33 @@ class _OverviewPageState extends State<OverviewPage> {
   List<Map<String, dynamic>> payments = [];
   List<Map<String, dynamic>> payments2 = [];
 
- 
-
   @override
   void initState() {
     super.initState();
     _loadTransactions();
-     loadPayment();
+    loadPayment();
+     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToEnd(); // Scroll to the end after the UI builds
+    });
   }
 
+
+  final ScrollController _scrollController =
+      ScrollController(); // Add Scroll Controller
+
+  void _scrollToEnd() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: Duration(milliseconds: 500),
+        curve: Curves.easeOut,
+      );
+    }
+  }
   Future<void> loadPayment() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? storedPayment = prefs.getString('paymentMethod');
-   // print('printing...... $storedPayment');
+    // print('printing...... $storedPayment');
     List<Map<String, dynamic>> paymentss = storedPayment != null
         ? List<Map<String, dynamic>>.from(json.decode(storedPayment))
         : [];
@@ -39,7 +53,7 @@ class _OverviewPageState extends State<OverviewPage> {
     });
   }
 
-    String? getPaymentTitleById(String paymentId) {
+  String? getPaymentTitleById(String paymentId) {
     final payment = payments2.firstWhere(
       (payment) => payment['id'] == paymentId,
       orElse: () => {'title': null}, // Return a default map
@@ -108,14 +122,14 @@ class _OverviewPageState extends State<OverviewPage> {
         payments.add({'id': key, 'totalAmount': value}); // Update payment list
       });
     });
-   // print('printing...... $payments');
+    // print('printing...... $payments');
   }
 
   Future<void> _loadTransactions() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String>? storedTransactions = prefs.getStringList('transaction_logs');
 
-     _generatePaymentMethods(selectedDate);
+    _generatePaymentMethods(selectedDate);
 
     if (storedTransactions != null) {
       try {
@@ -208,7 +222,7 @@ class _OverviewPageState extends State<OverviewPage> {
     setState(() {
       selectedDate = newDate;
       _loadTransactions();
-     // _generatePaymentMethods(selectedDate);
+      // _generatePaymentMethods(selectedDate);
     });
   }
 
@@ -216,13 +230,13 @@ class _OverviewPageState extends State<OverviewPage> {
   Widget build(BuildContext context) {
     // Generate Filter Dates
     DateTime today = DateTime.now();
-    DateTime yesterday = today.subtract(Duration(days: 1));
-    DateTime dayBeforeYesterday = today.subtract(Duration(days: 2));
+    List<Widget> dateButtons = [];
 
-    String todayString = DateFormat('MMM dd').format(today);
-    String yesterdayString = DateFormat('MMM dd').format(yesterday);
-    String dayBeforeYesterdayString =
-        DateFormat('MMM dd').format(dayBeforeYesterday);
+    for (int i = -10; i < 1; i++) {
+      DateTime date = today.add(Duration(days: i));
+      String dateString = DateFormat('MMM dd').format(date);
+      dateButtons.add(_buildFilterButton("📅 $dateString", date));
+    }
 
     // Calculate Grand Total
     double grandTotal = transactions.fold(0.0, (sum, transaction) {
@@ -243,15 +257,16 @@ class _OverviewPageState extends State<OverviewPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Date Filter Buttons
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildFilterButton(
-                      "📅 $dayBeforeYesterdayString", dayBeforeYesterday),
-                  _buildFilterButton("📅 $yesterdayString", yesterday),
-                  _buildFilterButton("📅 $todayString", today),
-                ],
-              ),
+               Container(
+      height: 70, // Set a fixed height for the container
+      child: SingleChildScrollView(
+            controller: _scrollController, 
+            scrollDirection: Axis.horizontal,
+        child: Row(
+          children: dateButtons,
+        ),
+      ),
+    ),
 
               SizedBox(height: 10),
 
@@ -291,7 +306,8 @@ class _OverviewPageState extends State<OverviewPage> {
                 height: 12,
               ),
               Container(
-                margin: EdgeInsets.symmetric(vertical: 8.0), // Add margin to the title
+                margin: EdgeInsets.symmetric(
+                    vertical: 8.0), // Add margin to the title
                 child: Text(
                   'Payment Methods',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -311,18 +327,23 @@ class _OverviewPageState extends State<OverviewPage> {
                         margin: EdgeInsets.symmetric(horizontal: 8.0),
                         elevation: 0,
                         child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 16.0, vertical: 0),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                getPaymentTitleById(payment['id']) ?? payment['id'],
+                                getPaymentTitleById(payment['id']) ??
+                                    payment['id'],
                                 style: TextStyle(fontSize: 14),
                               ),
                               SizedBox(height: 8),
                               Text(
                                 '₦${formatNumber(payment['totalAmount'])}',
-                                style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18),
                               ),
                             ],
                           ),
@@ -350,39 +371,39 @@ class _OverviewPageState extends State<OverviewPage> {
   }
 
   /// **Build Filter Button**
-  Widget _buildFilterButton(String label, DateTime filterDate) {
-    String a = selectedDate.toString().substring(0, 10);
-    String b = filterDate.toString().substring(0, 10);
+ Widget _buildFilterButton(String label, DateTime filterDate) {
+  String a = selectedDate.toString().substring(0, 10);
+  String b = filterDate.toString().substring(0, 10);
 
-    bool isSelected = a == b ? true : false; // Check if selected
+  bool isSelected = a == b; // Check if selected
 
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => _changeDate(filterDate), // Change date on tap
-        child: Container(
-          padding: EdgeInsets.symmetric(vertical: 18, horizontal: 2),
-          margin: EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            color: isSelected ? primaryColor : Colors.white, // Blue if selected
-            border: Border.all(color: Colors.grey), // Single grey border
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Center(
-            child: Text(
-              label,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  color: isSelected
-                      ? Colors.white
-                      : Colors.black, // White text if selected
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16),
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 4.0), // Optional padding
+    child: GestureDetector(
+      onTap: () => _changeDate(filterDate), // Change date on tap
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 18, horizontal: 12), // Add padding
+        margin: EdgeInsets.all(4), // Margin for buttons
+        decoration: BoxDecoration(
+          color: isSelected ? primaryColor : Colors.white,
+          border: Border.all(color: Colors.grey),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Center(
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: isSelected ? Colors.white : Colors.black,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
             ),
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   /// **Build Transaction List**
   Widget _buildTransactionList() {
