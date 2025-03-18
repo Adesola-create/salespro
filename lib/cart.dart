@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:salespro/constants.dart';
 import 'calculator.dart';
 import 'transaction.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -196,6 +197,7 @@ class _POSHomePageState extends State<POSHomePage> {
   Future<void> loadLocalData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? itemDataString = prefs.getString('itemData');
+    //print('itemDataString');
     if (itemDataString != null) {
       setState(() {
         servedBy = prefs.getString('userName') ?? '';
@@ -328,7 +330,6 @@ class _POSHomePageState extends State<POSHomePage> {
     // Save the transaction log
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> logs = prefs.getStringList('transaction_logs') ?? [];
-
     logs.add(jsonEncode(transactionLog.toJson()));
     await prefs.setStringList('transaction_logs', logs);
     await prefs.setString('cart', '');
@@ -893,7 +894,7 @@ class _POSHomePageState extends State<POSHomePage> {
                     child: ElevatedButton(
                       onPressed: checkout,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange, // Background color
+                        backgroundColor: primaryColor, // Background color
                         padding: EdgeInsets.symmetric(vertical: 15),
                         shape: RoundedRectangleBorder(
                           borderRadius:

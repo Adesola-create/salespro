@@ -17,9 +17,12 @@ class ItemHistoryPage extends StatefulWidget {
 
 class _ItemHistoryPageState extends State<ItemHistoryPage> {
   List<Map<String, dynamic>> _transactionLogs = [];
+  List<Map<String, dynamic>> _transactionLogsAll = [];
   bool _isLoading = true;
   DateTime selectedDate = DateTime.now();
   final ScrollController _scrollController = ScrollController();
+  //Set<String> transactionDates = {}; // Set to track transaction dates
+  Set<String> transactionItems = {}; // Set to track transaction dates
 
   @override
   void initState() {
@@ -43,7 +46,15 @@ class _ItemHistoryPageState extends State<ItemHistoryPage> {
       return dateB.compareTo(dateA);
     });
 
+    // transactionDates.clear();
+    // for (var log in loadedLogs) {
+    //   DateTime transactionDate = DateTime.parse(log['timestamp']);
+    //   String formattedDate = DateFormat('yyyy-MM-dd').format(transactionDate);
+    //   transactionDates.add(formattedDate);
+    // }
+
     setState(() {
+      _transactionLogsAll = loadedLogs;
       _transactionLogs =
           _filterTransactionsByItemAndDate(loadedLogs, selectedDate);
       _isLoading = false;
@@ -59,24 +70,43 @@ class _ItemHistoryPageState extends State<ItemHistoryPage> {
 
   List<Map<String, dynamic>> _filterTransactionsByItemAndDate(
       List<Map<String, dynamic>> allTransactions, DateTime date) {
-    String selectedDateString = DateFormat('yyyy-MM-dd').format(date);
     return allTransactions.where((transaction) {
       DateTime transactionDate = DateTime.parse(transaction['timestamp']);
       bool isSameDate = DateFormat('yyyy-MM-dd').format(transactionDate) ==
-          selectedDateString;
+          DateFormat('yyyy-MM-dd').format(date);
       bool containsItem =
           transaction['cart'].any((item) => item['title'] == widget.itemName);
-      return isSameDate && containsItem;
+      // Check if the date is "All" (i.e., when selectedDate is null)
+      return (selectedDate == DateTime(0, 0, 0) || isSameDate) &&
+          containsItem; // If selectedDate is set to a specific date, filter by that; otherwise, return all transactions.
     }).toList();
   }
 
-  Widget _buildFilterButton(DateTime filterDate) {
-    bool isSelected = DateFormat('yyyy-MM-dd').format(selectedDate) ==
-        DateFormat('yyyy-MM-dd').format(filterDate);
-    String label = DateFormat('MMM d').format(filterDate);
+  Widget _buildFilterButton(DateTime filterDate, {bool isAll = false}) {
+    bool isSelected = isAll
+        ? selectedDate == DateTime(0, 0, 0) // Check if "All" is selected
+        : DateFormat('yyyy-MM-dd').format(selectedDate) ==
+            DateFormat('yyyy-MM-dd').format(filterDate);
+    String label = isAll ? "All" : DateFormat('MMM d').format(filterDate);
+    //bool hasTransactions = transactionDates.contains(DateFormat('yyyy-MM-dd').format(filterDate));
+    bool hasTransactions = _transactionLogsAll.any((log) {
+      DateTime transactionDate = DateTime.parse(log['timestamp']);
+      return DateFormat('yyyy-MM-dd').format(transactionDate) ==
+              DateFormat('yyyy-MM-dd').format(filterDate) &&
+          log['cart'].any((item) => item['title'] == widget.itemName);
+    });
 
     return GestureDetector(
-      onTap: () => _changeDate(filterDate),
+      onTap: () {
+        if (isAll) {
+          setState(() {
+            selectedDate = DateTime(0, 0, 0); // Represents "All"
+            _loadTransactionLogs();
+          });
+        } else {
+          _changeDate(filterDate);
+        }
+      },
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 12, horizontal: 12),
         decoration: BoxDecoration(
@@ -84,15 +114,30 @@ class _ItemHistoryPageState extends State<ItemHistoryPage> {
           border: Border.all(color: Colors.grey),
           borderRadius: BorderRadius.circular(16),
         ),
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
-              color: isSelected ? Colors.white : Colors.black,
-              fontWeight: FontWeight.bold,
+        child: Row( // Changed Stack to Row for horizontal arrangement
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (hasTransactions) // Display indicator if there are transactions for this date
+            Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                color: isSelected ? Colors.white : Colors.red, // Color for the indicator
+                shape: BoxShape.circle,
+              ),
+            ),
+          SizedBox(width: 8), // Add space between the indicator and the label
+          Center(
+            child: Text(
+              label,
+              style: TextStyle(
+                color: isSelected ? Colors.white : Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
-        ),
+        ],
+      ),
       ),
     );
   }
@@ -118,14 +163,23 @@ class _ItemHistoryPageState extends State<ItemHistoryPage> {
             scrollDirection: Axis.horizontal,
             padding: EdgeInsets.all(10),
             child: Row(
-              children: List.generate(10, (index) {
-                DateTime date =
-                    DateTime.now().subtract(Duration(days: 9 - index));
-                return Padding(
+              children: [
+                // Add the "All" button at the start
+                Padding(
                   padding: EdgeInsets.symmetric(horizontal: 4),
-                  child: _buildFilterButton(date),
-                );
-              }),
+                  child: _buildFilterButton(DateTime.now(),
+                      isAll: true), // "All" button
+                ),
+                // Generate the last 10 days of buttons
+                ...List.generate(10, (index) {
+                  DateTime date =
+                      DateTime.now().subtract(Duration(days: 9 - index));
+                  return Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 4),
+                    child: _buildFilterButton(date),
+                  );
+                }),
+              ],
             ),
           ),
 
@@ -143,8 +197,6 @@ class _ItemHistoryPageState extends State<ItemHistoryPage> {
                           final log = _transactionLogs[index];
                           final total = log['total'];
                           final name = log['name'];
-                          // final salesID = log['salesID'];
-                          //  final timestamp = log['timestamp'];
 
                           return Container(
                             margin: EdgeInsets.symmetric(

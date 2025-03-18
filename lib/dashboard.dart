@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'constants.dart';
 import 'home_page.dart';
+import 'itemhistory.dart';
 
 class DashboardScreen extends StatefulWidget {
   @override
@@ -21,6 +22,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool isFetching = true;
   String business = '';
   TextEditingController searchController = TextEditingController();
+  DateTime selectedDate = DateTime.now();
 
   @override
   void initState() {
@@ -48,9 +50,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _fetchPayment() async {
-    //print('fetching payments.');
     SharedPreferences prefs = await SharedPreferences.getInstance();
-
     String? token = prefs.getString('apiKey');
     final url = Uri.parse('https://salespro.livepetal.com/v1/getpaymethod');
     try {
@@ -58,7 +58,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         url,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token'
+          'Authorization': 'Bearer $token',
         },
       );
 
@@ -85,7 +85,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Future<void> loadLocalData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? itemDataString = prefs.getString('itemData');
-    print('Loading data');
     if (itemDataString != null) {
       setState(() {
         localItemData = json.decode(itemDataString);
@@ -98,15 +97,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<void> fetchItems() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      // isFetching = true;
-    });
-
     const String url = 'https://salespro.livepetal.com/v1/products';
-    String? token = prefs.getString('apiKey'); // Use a valid token
+    String? token = prefs.getString('apiKey');
 
     try {
-      // Create headers
       Map<String, String> headers = {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
@@ -118,29 +112,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
       );
 
       if (response.statusCode == 200) {
-        // print('printing..... ${response.body}');
         final Map<String, dynamic> responseData = json.decode(response.body);
         List<dynamic> fetchedData = responseData['data'] ?? [];
-
-        // Download and save images locally
         await saveImagesLocally(fetchedData);
 
-        // Update local state
         setState(() {
           localItemData = fetchedData;
           isFetching = false;
         });
-        // Update filtered items after fetching new data
         _filterItems();
       } else {
         debugPrint('Error: ${response.statusCode} ${response.body}');
       }
     } catch (e) {
       debugPrint('Error fetching data: $e');
-    } finally {
-      // setState(() {
-      //   isFetching = false;
-      // });
     }
   }
 
@@ -168,15 +153,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     await prefs.setString('itemData', json.encode(data));
   }
 
-String formatNumber(num amount) {
+  String formatNumber(num amount) {
     final formatter = NumberFormat('#,###', 'en_US');
     return formatter.format(amount);
   }
 
-
   @override
   Widget build(BuildContext context) {
-    // Group items by category
     Map<String, List<Map<String, dynamic>>> groupedItems = {};
     for (var item in filteredItems) {
       String category = item['category'] ?? "Uncategorized";
@@ -194,178 +177,200 @@ String formatNumber(num amount) {
         ),
         automaticallyImplyLeading: false,
         backgroundColor: primaryColor,
-        actions: [
-          Stack(
-            children: [
-              IconButton(
-                icon: Icon(
-                  Icons.shopping_cart,
-                  color: Colors.white,
+      ),
+      body: Column(
+        children: [
+          // Search Bar
+       Container(
+  decoration: BoxDecoration(
+    color: primaryColor, // Deep orange background for the external container
+    borderRadius: BorderRadius.vertical(bottom: Radius.circular(16.0)), // Rounded corners at the bottom
+  ),
+  padding: const EdgeInsets.all(12.0),
+  child: Row(
+    children: [
+     Expanded(
+  child: TextField(
+    controller: searchController,
+    decoration: InputDecoration(
+      hintText: "Search your store...",
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8.0),
+        borderSide: BorderSide.none, // Remove border color
+      ),
+      prefixIcon: Icon(Icons.search, color: Colors.black), // Change icon color to black
+      filled: true,
+      fillColor: Colors.white, // Background color of the text field
+      hintStyle: TextStyle(color: Colors.black), // Hint text color
+      contentPadding: EdgeInsets.symmetric(vertical: 8.0), // Reduce height
+    ),
+  ),
+),
+      SizedBox(width: 8),
+      Stack(
+        children: [
+          IconButton(
+            icon: Icon(
+              Icons.shopping_cart_outlined,
+              color: Colors.white, // Change icon color to white
+              size: 28,
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => HomePage(selectedIndex: 1),
                 ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => HomePage(selectedIndex: 1),
-                    ),
-                  );
-                },
-              ),
-              if (cart.length > 0)
-                Positioned(
-                  right: 2,
-                  top: 8,
-                  child: Container(
-                    padding: EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: Colors.black,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    constraints: BoxConstraints(
-                      minWidth: 16,
-                      minHeight: 16,
-                    ),
-                    child: Text(
-                      '${cart.length}',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-            ],
+              );
+            },
           ),
-          SizedBox(width: 8),
+          if (cart.length > 0)
+            Positioned(
+              right: 2,
+              top: 8,
+              child: Container(
+                padding: EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                constraints: BoxConstraints(
+                  minWidth: 16,
+                  minHeight: 16,
+                ),
+                child: Text(
+                  '${cart.length}',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
         ],
       ),
-      body: isFetching
-          ? Center(child: CircularProgressIndicator())
-          : filteredItems.isEmpty
-              ? Center(child: Text("No data available"))
-              : SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      // Search Bar
-                      Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: TextField(
-                          controller: searchController,
-                          decoration: InputDecoration(
-                            hintText: "Search your cravings...",
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(24.0),
-                              borderSide: BorderSide(color: primaryColor),
-                            ),
-                            prefixIcon: Icon(Icons.search),
+      SizedBox(height: 52,),
+    ],
+  ),
+),
+          isFetching
+              ? Center(child: CircularProgressIndicator())
+              : filteredItems.isEmpty
+                  ? Center(child: Text("No data available"))
+                  : Expanded(
+                      child: SingleChildScrollView(
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: groupedItems.entries.map((entry) {
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 0),
+                                    child: Text(
+                                      entry.key,
+                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 190,
+                                    child: ListView(
+                                      scrollDirection: Axis.horizontal,
+                                      children: entry.value.map((item) {
+                                        return Container(
+                                          margin: EdgeInsets.all(6.0),
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(12.0),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.grey.withOpacity(0.2),
+                                                blurRadius: 5,
+                                                spreadRadius: 2,
+                                              ),
+                                            ],
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(12.0),
+                                            child: GestureDetector(
+                                              onTap: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) => ItemHistoryPage(
+                                                      itemName: item['title'] ?? "No Title",
+                                                      salesDate: selectedDate,
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                              child: Container(
+                                                width: 120,
+                                                child: Column(
+                                                  mainAxisAlignment: MainAxisAlignment.start,
+                                                  children: [
+                                                    item['localImagePath'] != null && File(item['localImagePath']).existsSync()
+                                                        ? Image.file(
+                                                            File(item['localImagePath']),
+                                                            width: 120,
+                                                            height: 120,
+                                                            fit: BoxFit.cover,
+                                                          )
+                                                        : Icon(
+                                                            Icons.image_not_supported,
+                                                            size: 120,
+                                                            color: Colors.grey,
+                                                          ),
+                                                    SizedBox(height: 5),
+                                                    Text(
+                                                      item['title'] ?? "No Title",
+                                                      textAlign: TextAlign.left,
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow.ellipsis,
+                                                    ),
+                                                    Row(
+                                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                      children: [
+                                                        Text(
+                                                          '₦${formatNumber(item['price'] ?? '0.00')}',
+                                                          style: TextStyle(fontWeight: FontWeight.bold),
+                                                        ),
+                                                        Container(
+                                                          padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                                                          decoration: BoxDecoration(
+                                                            color: (item['qty'] ?? 0) > 0 ? Colors.green : Color.fromARGB(255, 177, 40, 30),
+                                                            borderRadius: BorderRadius.circular(12),
+                                                          ),
+                                                          child: Text(
+                                                            '${item['qty'] ?? '0'} ',
+                                                            style: TextStyle(
+                                                              color: Colors.white,
+                                                              fontWeight: FontWeight.bold,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }).toList(),
                           ),
                         ),
                       ),
-
-                      // Display grouped items
-                     Padding(
-  padding: const EdgeInsets.all(12.0),
-  child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: groupedItems.entries.map((entry) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 0),
-            child: Text(
-              entry.key,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-          ),
-          SizedBox(
-  height: 190,
-  child: ListView(
-    scrollDirection: Axis.horizontal,
-    children: entry.value.map((item) {
-      return Container(
-        margin: EdgeInsets.all(6.0),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12.0), // Rounded corners
-          //border: Border.all(color: Colors.grey.shade300), // Light border for flat look
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.2), // Subtle shadow for depth
-              blurRadius: 5,
-              spreadRadius: 2,
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(12.0), // Ensure rounded corners on content
-          child: Container(
-            width: 120,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                item['localImagePath'] != null
-                    ? Image.file(
-                        File(item['localImagePath']),
-                        width: 120,
-                        height: 120,
-                        fit: BoxFit.cover,
-                      )
-                    : Icon(
-                        Icons.image_not_supported,
-                        size: 120,
-                        color: Colors.grey,
-                      ),
-                SizedBox(height: 5),
-                Text(
-                  item['title'] ?? "No Title",
-                  textAlign: TextAlign.left, // Align title to the left
-                  maxLines: 1, // Limit to 1 line
-                  overflow: TextOverflow.ellipsis, // Handle overflow
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '  ₦${formatNumber(item['price'] ?? '0.00')}',
-                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 8.0, vertical: 4.0),
-                      decoration: BoxDecoration(
-                        color: (item['qty'] ?? 0) > 0
-                            ? Colors.green // Green if qty > 0
-                            : const Color.fromARGB(255, 177, 40, 30), // Red otherwise
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        '${item['qty'] ?? '0'}  ',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }).toList(),
-  ),
-),
-
         ],
-      );
-    }).toList(),
-  ),
-)
-                    ],
-                  ),
-                ),
+      ),
     );
   }
 }

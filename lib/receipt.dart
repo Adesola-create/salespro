@@ -26,6 +26,7 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
   String business = '';
   String services = '';
   String address = '';
+  String businessphone = '';
   List<Map<String, dynamic>> payments = [];
 
   BlueThermalPrinter bluetooth = BlueThermalPrinter.instance;
@@ -126,6 +127,8 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
       business = prefs.getString('business') ?? '';
       services = prefs.getString('services') ?? '';
       address = prefs.getString('address') ?? '';
+      businessphone = prefs.getString('businessphone') ?? ''; 
+      
     });
     //printReceipt();
   }
@@ -169,7 +172,7 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
   Future<void> loadPayment() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? storedPayment = prefs.getString('paymentMethod');
-    print('printing...... $storedPayment');
+    ///print('printing...... $storedPayment');
     List<Map<String, dynamic>> paymentss = storedPayment != null
         ? List<Map<String, dynamic>>.from(json.decode(storedPayment))
         : [];
@@ -338,6 +341,9 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
             Center(
               child: Text(address, style: TextStyle(fontSize: 16)),
             ),
+            Center(
+              child: Text(businessphone, style: TextStyle(fontSize: 16)),
+            ),
             SizedBox(height: 20),
             Text('Customer: ${widget.salesLog['name']}',
                 style: TextStyle(fontSize: 16)),
@@ -459,6 +465,7 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
     bluetooth.printCustom(business, 1, 1); // Business name, bold size
     //bluetooth.printCustom('($services)', 0, 1);
     bluetooth.printCustom(address, 0, 1);
+    bluetooth.printCustom(businessphone, 0, 1);
     bluetooth.printNewLine();
 
     // Customer Info

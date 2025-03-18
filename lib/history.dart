@@ -15,6 +15,7 @@ class _HistoryPageState extends State<HistoryPage> {
   List<Map<String, dynamic>> _transactionLogs = [];
   bool _isLoading = true;
   DateTime selectedDate = DateTime.now(); // Default to today
+  Set<String> transactionDates = {}; // Set to track transaction dates
 
   @override
   void initState() {
@@ -40,6 +41,13 @@ class _HistoryPageState extends State<HistoryPage> {
       DateTime dateB = DateTime.parse(b['timestamp']);
       return dateB.compareTo(dateA);
     });
+
+      transactionDates.clear();
+    for (var log in loadedLogs) {
+      DateTime transactionDate = DateTime.parse(log['timestamp']);
+      String formattedDate = DateFormat('yyyy-MM-dd').format(transactionDate);
+      transactionDates.add(formattedDate);
+    }
 
     setState(() {
       _transactionLogs = loadedLogs; // Store all transactions
@@ -81,47 +89,57 @@ class _HistoryPageState extends State<HistoryPage> {
   }
 
   Widget _buildFilterButton(DateTime filterDate) {
-    String a = selectedDate.toString().substring(0, 10);
-    String b = filterDate.toString().substring(0, 10);
+  String a = selectedDate.toString().substring(0, 10);
+  String b = filterDate.toString().substring(0, 10);
 
-    bool isSelected = a == b ? true : false; // Check if selected
-    String label = DateFormat('dd').format(filterDate);
-    String label2 = DateFormat('E').format(filterDate);
+  bool isSelected = a == b; // Check if selected
+  String label = DateFormat('dd').format(filterDate);
+  String label2 = DateFormat('E').format(filterDate);
 
-    return GestureDetector(
-      onTap: () => _changeDate(filterDate),
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? primaryColor : Colors.white,
-          border: Border.all(color: Colors.grey),
-          borderRadius: BorderRadius.circular(22),
-        ),
-        child: Column(
-          // Use Column to stack the texts vertically
-          mainAxisSize: MainAxisSize.min, // Keep the column size compact
-          children: [
-            Text(
-              label, // First label
-              style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.black,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 24),
-            ),
-            //SizedBox(height: 4), // Space between the two labels
-            Text(
-              label2, // Second label below
-              style: TextStyle(
-                color: isSelected ? Colors.white : Colors.black,
-                fontSize: 14, // Slightly smaller font size for distinction
+  bool hasTransactions = transactionDates.contains(DateFormat('yyyy-MM-dd').format(filterDate));
+
+  return GestureDetector(
+    onTap: () => _changeDate(filterDate),
+    child: Container(
+      padding: EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+      decoration: BoxDecoration(
+        color: isSelected ? primaryColor : Colors.white,
+        border: Border.all(color: Colors.grey),
+        borderRadius: BorderRadius.circular(22),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min, // Keep the column size compact
+        children: [
+          if (hasTransactions) // Display indicator if there are transactions for this date
+            Container(
+              width: 12,
+              height: 8,
+              decoration: BoxDecoration(
+                color: isSelected ? Colors.white : Colors.red, // Color for the indicator
+                shape: BoxShape.circle,
               ),
             ),
-          ],
-        ),
+          Text(
+            label, // First label
+            style: TextStyle(
+              color: isSelected ? Colors.white : Colors.black,
+              fontWeight: FontWeight.bold,
+              fontSize: 24,
+            ),
+          ),
+          // SizedBox(height: 4), // Space between the two labels
+          Text(
+            label2, // Second label below
+            style: TextStyle(
+              color: isSelected ? Colors.white : Colors.black,
+              fontSize: 14, // Slightly smaller font size for distinction
+            ),
+          ),
+        ],
       ),
-    );
-  }
-
+    ),
+  );
+}
   final ScrollController _scrollController =
       ScrollController(); // Add Scroll Controller
 

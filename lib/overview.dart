@@ -16,6 +16,7 @@ class _OverviewPageState extends State<OverviewPage> {
   DateTime selectedDate = DateTime.now(); // Default to Today
   List<Map<String, dynamic>> payments = [];
   List<Map<String, dynamic>> payments2 = [];
+  
 
   @override
   void initState() {
@@ -43,7 +44,6 @@ class _OverviewPageState extends State<OverviewPage> {
   Future<void> loadPayment() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? storedPayment = prefs.getString('paymentMethod');
-    // print('printing...... $storedPayment');
     List<Map<String, dynamic>> paymentss = storedPayment != null
         ? List<Map<String, dynamic>>.from(json.decode(storedPayment))
         : [];
@@ -122,7 +122,6 @@ class _OverviewPageState extends State<OverviewPage> {
         payments.add({'id': key, 'totalAmount': value}); // Update payment list
       });
     });
-    // print('printing...... $payments');
   }
 
   Future<void> _loadTransactions() async {

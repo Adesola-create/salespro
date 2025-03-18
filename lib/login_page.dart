@@ -83,16 +83,18 @@ class _LoginScreenState extends State<LoginScreen> {
               'userName', '${user['firstname']} ${user['lastname']}');
           await prefs.setString('userEmail', user['email']);
           await prefs.setString('userPhone', user['phone']);
+          await prefs.setString('businessphone', user['businessphone']);
           await prefs.setString('apiKey', user['apikey']);
           await prefs.setString('bid', user['bid']);
 
           await prefs.setString('business', user['business'] ?? '');
           await prefs.setString('services', user['services'] ?? '');
           await prefs.setString('address', user['address'] ?? '');
-          await prefs.setInt('editPrice', int.parse(user['editprice']));
+          await prefs.setInt('editPrice', user['editprice']);
 
-          print(jsonEncode(user));
-          print(user['apikey']);
+          // print(jsonEncode(user));
+          //  print(user['businessphone']);
+          //  print(user['editprice']);
 
           //end of fetching
           Navigator.pushReplacement(
@@ -107,7 +109,7 @@ class _LoginScreenState extends State<LoginScreen> {
             context, 'An error occurred. Please try again. ${data['message']}');
       }
     } catch (e) {
-      _showErrorDialog(context, 'Please check your connection and try again.');
+      _showErrorDialog(context, 'Please check your connection and try again. $e');
     } finally {
       setState(() {
         _isLoading = false;
