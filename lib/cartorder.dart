@@ -11,12 +11,14 @@ import 'receipt.dart';
 import 'package:http/http.dart' as http;
 import 'scanner.dart';
 
-class POSHomePage extends StatefulWidget {
+class CartOrderPage extends StatefulWidget {
+  final Map<String, dynamic> order;
+  CartOrderPage({required this.order});
   @override
-  _POSHomePageState createState() => _POSHomePageState();
+  _CartOrderPageState createState() => _CartOrderPageState();
 }
 
-class _POSHomePageState extends State<POSHomePage> {
+class _CartOrderPageState extends State<CartOrderPage> {
   List<Map<String, dynamic>> products = [];
   List<Map<String, dynamic>> cart = [];
   List<Map<String, String>> customers = [];
@@ -42,10 +44,10 @@ class _POSHomePageState extends State<POSHomePage> {
   void initState() {
     super.initState();
     loadLocalData();
-    loadCart();
-    _loadCustomers();
+    // loadCart();
+    //_loadCustomers();
     _sendUnsentCustomers();
-
+    processCart();
     loadPayment();
   }
 
@@ -62,6 +64,50 @@ class _POSHomePageState extends State<POSHomePage> {
     }
   }
 
+  void processCart() {
+    Map<String, dynamic> salesData = widget.order;
+    // Check if the salesData contains the 'cart' key and it's not empty
+    if (salesData.containsKey('cart') && salesData['cart'] is List) {
+      List<dynamic> cartItems = salesData['cart'];
+
+      // Loop through each cart item
+      for (var item in cartItems) {
+        if (item is Map<String, dynamic>) {
+          String id = item['id']; // Get the item id as String
+          int qty = item['qty']??1;
+          addToCartFromId(id, qty); // Call the method with item id and qty
+        }
+      }
+    }
+  }
+
+  addToCartFromId(String id, int qty) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? itemDataString = prefs.getString('itemData');
+    if (itemDataString == null) return;
+
+    List<Map<String, dynamic>> products =
+        List<Map<String, dynamic>>.from(json.decode(itemDataString));
+
+    Map<String, dynamic>? product =
+        products.firstWhere((item) => item['id'] == id, orElse: () => {});
+
+    if (product.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Product not found!'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      cart.add({...product, 'qty': qty, 'amount': product['price']});
+      // saveCart();
+    });
+  }
+
   // Future<void> _loadCustomers() async {
   //   SharedPreferences prefs = await SharedPreferences.getInstance();
   //   String? customersString = prefs.getString('myCustomers');
@@ -74,19 +120,19 @@ class _POSHomePageState extends State<POSHomePage> {
   //     });
   //   }
   // }
-  Future<void> _loadCustomers() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? customersString = prefs.getString('myCustomers');
+  // Future<void> _loadCustomers() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   String? customersString = prefs.getString('myCustomers');
 
-    if (customersString != null) {
-      setState(() {
-        customers = List<Map<String, String>>.from(json
-            .decode(customersString)
-            .map((e) => Map<String, String>.from(e)));
-        //filteredCustomers = List.from(customers); // Initialize filteredCustomers
-      });
-    }
-  }
+  //   if (customersString != null) {
+  //     setState(() {
+  //       customers = List<Map<String, String>>.from(json
+  //           .decode(customersString)
+  //           .map((e) => Map<String, String>.from(e)));
+  //       //filteredCustomers = List.from(customers); // Initialize filteredCustomers
+  //     });
+  //   }
+  // }
 
   Future<void> _addCustomer(String name, String phone) async {
     if (name.isEmpty) {
@@ -118,58 +164,6 @@ class _POSHomePageState extends State<POSHomePage> {
     await prefs.setString('myCustomers', json.encode(customers));
   }
 
-  Future<void> _fetchCustomer() async {
-    print('fetching new customers.');
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? storedCustomers = prefs.getString('myCustomers');
-    List<Map<String, dynamic>> customers = storedCustomers != null
-        ? List<Map<String, dynamic>>.from(json.decode(storedCustomers))
-        : [];
-
-    // Ensure no contact has 'sent' status of false
-    if (customers.any((customer) => customer['sent'] == 'false')) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Not Synchronized'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-      _sendUnsentCustomers();
-      return;
-    }
-
-    String? token = prefs.getString('apiKey');
-    final url = Uri.parse('https://salespro.livepetal.com/v1/getcontact');
-    try {
-      final response = await http.get(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token'
-        },
-      );
-
-      if (response.statusCode == 200) {
-        List<Map<String, dynamic>> fetchedCustomers =
-            List<Map<String, dynamic>>.from(json.decode(response.body));
-        await prefs.setString('myCustomers', json.encode(fetchedCustomers));
-
-        setState(() {
-          customers = List<Map<String, String>>.from(
-              fetchedCustomers.map((e) => Map<String, String>.from(e)));
-        });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Contacts Synchronized'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
-    } catch (e) {
-      print('Error fetching customers: $e');
-    }
-  }
 
   Future<bool> _sendToServer(Map<String, dynamic> customer) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -197,9 +191,14 @@ class _POSHomePageState extends State<POSHomePage> {
   Future<void> loadLocalData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? itemDataString = prefs.getString('itemData');
-    //print('itemDataString');
+
+    Map<String, dynamic> salesData = widget.order;
+    //  List<dynamic> cartItems = salesData['cart'];
+
     if (itemDataString != null) {
       setState(() {
+        name = salesData['customer'];
+        phone = salesData['phone'];
         servedBy = prefs.getString('userName') ?? '';
         editPrice = prefs.getInt('editPrice') ?? 0;
         Bid = prefs.getString('bid') ?? '';
@@ -223,7 +222,7 @@ class _POSHomePageState extends State<POSHomePage> {
 
   Future<void> loadCart() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? cartData = prefs.getString('cart');
+    String? cartData = prefs.getString('cartorder');
     if (cartData != null && cartData.isNotEmpty) {
       setState(() {
         cart = List<Map<String, dynamic>>.from(jsonDecode(cartData));
@@ -231,10 +230,10 @@ class _POSHomePageState extends State<POSHomePage> {
     }
   }
 
-  void saveCart() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString('cart', jsonEncode(cart));
-  }
+  // void saveCart() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   prefs.setString('cartorder', jsonEncode(cart));
+  // }
 
   void updateQuantity(int index, int change) {
     setState(() {
@@ -243,7 +242,7 @@ class _POSHomePageState extends State<POSHomePage> {
         cart[index]['qty'] = 1; // Prevent going below 1
       }
       cart[index]['amount'] = (cart[index]['price'] ?? 0) * cart[index]['qty'];
-      saveCart();
+      //saveCart();
     });
   }
 
@@ -263,7 +262,7 @@ class _POSHomePageState extends State<POSHomePage> {
         cart[index]['qty'] += 1;
         cart[index]['amount'] = cart[index]['price'] * cart[index]['qty'];
       }
-      saveCart();
+      // saveCart();
     });
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -276,7 +275,7 @@ class _POSHomePageState extends State<POSHomePage> {
   void removeFromCart(int index) {
     setState(() {
       cart.removeAt(index);
-      saveCart();
+      // saveCart();
     });
   }
 
@@ -291,7 +290,6 @@ class _POSHomePageState extends State<POSHomePage> {
       return;
     }
 
-    
     if (selectedPaymentMethod == 'Select Method') {
       _showPaymentOptions(context);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -314,7 +312,6 @@ class _POSHomePageState extends State<POSHomePage> {
       return;
     }
 
-
     // Generate a unique sales ID
     String salesID = '$Bid${DateTime.now().millisecondsSinceEpoch}';
 
@@ -335,7 +332,7 @@ class _POSHomePageState extends State<POSHomePage> {
     logs.add(jsonEncode(transactionLog.toJson()));
     print(jsonEncode(transactionLog.toJson()));
     await prefs.setStringList('transaction_logs', logs);
-    await prefs.setString('cart', '');
+    await prefs.setString('cartorder', '');
     selectedPaymentMethod = 'Select Method';
 
     // Navigate to receipt screen with the current cart items
@@ -409,7 +406,7 @@ class _POSHomePageState extends State<POSHomePage> {
                 setState(() {
                   cart[index]['qty'] = newQty;
                   cart[index]['amount'] = cart[index]['price'] * newQty;
-                  saveCart();
+                  // saveCart();
                 });
                 Navigator.pop(context);
               },
@@ -465,7 +462,7 @@ class _POSHomePageState extends State<POSHomePage> {
                 setState(() {
                   cart[index]['price'] = newPrice;
                   cart[index]['amount'] = cart[index]['qty'] * newPrice;
-                  saveCart();
+                  // saveCart();
                 });
                 Navigator.pop(context);
               },
@@ -846,42 +843,7 @@ class _POSHomePageState extends State<POSHomePage> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Row(
-                        children: [
-                          IconButton(
-                            icon: Icon(Icons.sync),
-                            onPressed: () {
-                              _fetchCustomer(); // Show add customer dialog
-                            },
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.person_remove),
-                            onPressed: () {
-                              _noCustomerName(); // Show add customer dialog
-                            },
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.person_add),
-                            onPressed: () {
-                              _showAddCustomerModal(
-                                  context); // Show add customer dialog
-                            },
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.person_search),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => CustomerSearchPage(
-                                        newName: name,
-                                        newPhone: phone,
-                                        addName: addName)),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
+                    
                     ],
                   ),
                   SizedBox(height: 10),
@@ -923,12 +885,6 @@ class _POSHomePageState extends State<POSHomePage> {
     );
   }
 
-  _noCustomerName() {
-    setState(() {
-      name = 'Customer';
-      phone = '';
-    });
-  }
 
 // Function to show top modal for adding a new customer
   void _showAddCustomerModal(BuildContext context) {

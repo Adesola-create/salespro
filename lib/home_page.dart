@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'account.dart';
+import 'order.dart';
 import 'dashboard.dart'; // Import your other pages
 import 'cart.dart';
 import 'history.dart';
 import 'overview.dart';
-//import 'scanner.dart';
-// import 'account_page.dart';
 
 class HomePage extends StatefulWidget {
   final int selectedIndex; // Add this parameter
@@ -21,12 +19,11 @@ class _HomePageState extends State<HomePage> {
 
   // List of pages to display when navigating using BottomNavBar
   final List<Widget> _pages = [
-    DashboardScreen(), // Dashboard page
-    POSHomePage(), // Exercise page
-    HistoryPage(), // History page
-    OverviewPage(), // Overview page
-    AccountPage(), // Account page
-   // BarcodeScannerPage(), //Scanner page
+    DashboardScreen(), 
+    POSHomePage(), 
+    OrderPage(),
+    HistoryPage(), 
+    OverviewPage(), 
   ];
   @override
   void initState() {
@@ -79,18 +76,19 @@ class _HomePageState extends State<HomePage> {
               icon: _buildIcon(Icons.shopping_cart, Icons.shopping_cart_outlined, 1),
               label: 'Cart',
             ),
+             BottomNavigationBarItem(
+              icon: _buildIcon(Icons.checklist_outlined, Icons.checklist_outlined, 2),
+              label: 'Order',
+            ),
             BottomNavigationBarItem(
-              icon: _buildIcon(Icons.history, Icons.history_outlined, 2),
+              icon: _buildIcon(Icons.history, Icons.history_outlined, 3),
               label: 'History',
             ),
             BottomNavigationBarItem(
-              icon: _buildIcon(Icons.gamepad, Icons.gamepad_outlined, 3),
+              icon: _buildIcon(Icons.gamepad, Icons.gamepad_outlined, 4),
               label: 'Overview',
             ),
-            BottomNavigationBarItem(
-              icon: _buildIcon(Icons.settings, Icons.settings_outlined, 4),
-              label: 'Account',
-            ),
+           
             // BottomNavigationBarItem(
             //   icon: _buildIcon(Icons.scanner, Icons.scanner_outlined, 4),
             //   label: 'Scanner',

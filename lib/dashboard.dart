@@ -9,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'constants.dart';
 import 'home_page.dart';
 import 'itemhistory.dart';
+import 'account.dart';
 
 class DashboardScreen extends StatefulWidget {
   @override
@@ -250,6 +251,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
         ],
       ),
+IconButton(
+  icon: Icon(
+    Icons.person_outline, // Use profile icon
+    color: Colors.white, // Keep icon color as white
+    size: 28,
+  ),
+  onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AccountPage(), // Update to navigate to the AccountPage
+      ),
+    );
+  },
+),
+
       SizedBox(height: 52,),
     ],
   ),
