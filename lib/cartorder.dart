@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:salespro/constants.dart';
 import 'calculator.dart';
+import 'home_page.dart';
 import 'transaction.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -69,12 +70,12 @@ class _CartOrderPageState extends State<CartOrderPage> {
     // Check if the salesData contains the 'cart' key and it's not empty
     if (salesData.containsKey('cart') && salesData['cart'] is List) {
       List<dynamic> cartItems = salesData['cart'];
-
+      print('printing....$cartItems');
       // Loop through each cart item
       for (var item in cartItems) {
         if (item is Map<String, dynamic>) {
           String id = item['id']; // Get the item id as String
-          int qty = item['qty']??1;
+          int qty = item['qty'] ?? 1;
           addToCartFromId(id, qty); // Call the method with item id and qty
         }
       }
@@ -164,6 +165,58 @@ class _CartOrderPageState extends State<CartOrderPage> {
     await prefs.setString('myCustomers', json.encode(customers));
   }
 
+  Future<void> _fetchCustomer() async {
+    print('fetching new customers.');
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? storedCustomers = prefs.getString('myCustomers');
+    List<Map<String, dynamic>> customers = storedCustomers != null
+        ? List<Map<String, dynamic>>.from(json.decode(storedCustomers))
+        : [];
+
+    // Ensure no contact has 'sent' status of false
+    if (customers.any((customer) => customer['sent'] == 'false')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Not Synchronized'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      _sendUnsentCustomers();
+      return;
+    }
+
+    String? token = prefs.getString('apiKey');
+    final url = Uri.parse('https://salespro.livepetal.com/v1/getcontact');
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token'
+        },
+      );
+
+      if (response.statusCode == 200) {
+        List<Map<String, dynamic>> fetchedCustomers =
+            List<Map<String, dynamic>>.from(json.decode(response.body));
+        await prefs.setString('myCustomers', json.encode(fetchedCustomers));
+
+        setState(() {
+          customers = List<Map<String, String>>.from(
+              fetchedCustomers.map((e) => Map<String, String>.from(e)));
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Contacts Synchronized'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error fetching customers: $e');
+    }
+  }
 
   Future<bool> _sendToServer(Map<String, dynamic> customer) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -197,8 +250,8 @@ class _CartOrderPageState extends State<CartOrderPage> {
 
     if (itemDataString != null) {
       setState(() {
-        name = salesData['customer'];
-        phone = salesData['phone'];
+        name = salesData['customer_name'] ?? '';
+        phone = salesData['phone'] ?? '';
         servedBy = prefs.getString('userName') ?? '';
         editPrice = prefs.getInt('editPrice') ?? 0;
         Bid = prefs.getString('bid') ?? '';
@@ -313,7 +366,8 @@ class _CartOrderPageState extends State<CartOrderPage> {
     }
 
     // Generate a unique sales ID
-    String salesID = '$Bid${DateTime.now().millisecondsSinceEpoch}';
+    String salesID = widget.order['salesid'];
+    //'$Bid${DateTime.now().millisecondsSinceEpoch}';
 
     // Create a transaction log
     TransactionLog transactionLog = TransactionLog(
@@ -335,6 +389,7 @@ class _CartOrderPageState extends State<CartOrderPage> {
     await prefs.setString('cartorder', '');
     selectedPaymentMethod = 'Select Method';
 
+    _showAddCustomerModal(context);
     // Navigate to receipt screen with the current cart items
     Navigator.push(
       context,
@@ -346,8 +401,7 @@ class _CartOrderPageState extends State<CartOrderPage> {
     // Clear the cart
     setState(() {
       cart.clear();
-      name = '';
-      phone = '';
+      salesID = '$Bid${DateTime.now().millisecondsSinceEpoch}';
     });
   }
 
@@ -406,6 +460,7 @@ class _CartOrderPageState extends State<CartOrderPage> {
                 setState(() {
                   cart[index]['qty'] = newQty;
                   cart[index]['amount'] = cart[index]['price'] * newQty;
+
                   // saveCart();
                 });
                 Navigator.pop(context);
@@ -514,24 +569,6 @@ class _CartOrderPageState extends State<CartOrderPage> {
             ),
             child: IconButton(
               icon: Icon(
-                Icons.qr_code,
-                color: Colors.black,
-                size: 32,
-              ),
-              onPressed: () => _navigateToScanner(),
-            ),
-          ),
-          SizedBox(
-            width: 4,
-          ),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.grey[300], // Light grey background
-              borderRadius: BorderRadius.circular(14), // Border radius
-              border: Border.all(color: Colors.grey, width: 1), // Grey border
-            ),
-            child: IconButton(
-              icon: Icon(
                 Icons.add,
                 color: Colors.black,
                 size: 32,
@@ -556,7 +593,7 @@ class _CartOrderPageState extends State<CartOrderPage> {
               ),
               padding: EdgeInsets.all(8), // Padding around the textF
               child: Text(
-                '₦${formatNumber(cart.fold<num>(0, (sum, item) => sum + (item['amount'] ?? 0)))}',
+                '₦${formatNumber(cart.fold<num>(0, (sum, item) => sum + (item['amount'] * item['qty']?? 0)))}',
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
             ),
@@ -635,7 +672,7 @@ class _CartOrderPageState extends State<CartOrderPage> {
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      "₦${product['price'] ?? '0.00'}",
+                                      "₦${formatNumber(product['price'] ?? '0.00')}",
                                       style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
@@ -684,6 +721,7 @@ class _CartOrderPageState extends State<CartOrderPage> {
                 physics: NeverScrollableScrollPhysics(), // Disable scrolling
                 itemBuilder: (context, index) {
                   var item = cart[index];
+                  int total = item['qty'] * item['price']; // Calculate total for current item
                   return Container(
                     margin: EdgeInsets.symmetric(vertical: 4.0),
                     decoration: BoxDecoration(
@@ -790,7 +828,7 @@ class _CartOrderPageState extends State<CartOrderPage> {
                                         ],
                                       ),
                                       Text(
-                                        "₦${formatNumber(item['amount'])}",
+                                        "₦${formatNumber(total)}",
                                         style: TextStyle(
                                             color: Colors.black,
                                             fontSize: 20,
@@ -824,10 +862,10 @@ class _CartOrderPageState extends State<CartOrderPage> {
                   SizedBox(height: 10),
                   _buildGroupedSection([
                     _buildSummaryItem('Subtotal',
-                        '₦${formatNumber(cart.fold<num>(0, (sum, item) => sum + (item['amount'] ?? 0)))}'),
+                        '₦${formatNumber(cart.fold<num>(0, (sum, item) => sum + (item['amount'] * item['qty'] ?? 0)))}'),
                     _buildSummaryItem('Charges', '₦0.00'),
                     _buildSummaryItem('Grand Total',
-                        '₦${formatNumber(cart.fold<num>(0, (sum, item) => sum + (item['amount'] ?? 0)))}',
+                        '₦${formatNumber(cart.fold<num>(0, (sum, item) => sum + (item['amount']* item['qty'] ?? 0)))}',
                         isTotal: true),
                     _buildSummaryItem('Payment method', selectedPaymentMethod,
                         onTap: () => _showPaymentOptions(context)),
@@ -843,7 +881,6 @@ class _CartOrderPageState extends State<CartOrderPage> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                    
                     ],
                   ),
                   SizedBox(height: 10),
@@ -885,85 +922,59 @@ class _CartOrderPageState extends State<CartOrderPage> {
     );
   }
 
+  _noCustomerName() {
+    setState(() {
+      name = 'Customer';
+      phone = '';
+    });
+  }
 
-// Function to show top modal for adding a new customer
   void _showAddCustomerModal(BuildContext context) {
-    TextEditingController nameController = TextEditingController(text: name);
-    TextEditingController phoneController = TextEditingController(text: phone);
-
     showDialog(
       context: context,
+      barrierDismissible: false, // Prevent dismissal by tapping outside
       builder: (context) {
         return Dialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(
-                top: Radius.circular(16)), // Rounded top corners
+            borderRadius: BorderRadius.all(Radius.circular(16)),
           ),
           child: SingleChildScrollView(
             child: Padding(
               padding: EdgeInsets.all(16.0),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisSize:
+                    MainAxisSize.min, // Make the dialog height wrap its content
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Add Customer',
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.close),
-                        onPressed: () {
-                          Navigator.of(context).pop(); // Close modal
-                        },
-                        tooltip: 'Close',
-                      ),
-                    ],
+                  SizedBox(height: 30),
+                  Text(
+                    'Transaction Complete!',
+                    style: TextStyle(fontSize: 18),
+                    textAlign: TextAlign.center,
                   ),
-                  TextField(
-                    controller: nameController,
-                    decoration: InputDecoration(labelText: 'Name'),
-                    onChanged: (value) {
-                      name = value;
+                  SizedBox(height: 40),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                      backgroundColor: primaryColor,
+                      textStyle: TextStyle(fontSize: 20),
+                    ),
+                    onPressed: () {
+                      // Dismiss the dialog and navigate to the Order Page
+                      Navigator.of(context).pop(); // Dismiss the dialog
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => HomePage(selectedIndex: 2),
+                        ),
+                      );
                     },
+                    child: Text(
+                      'Back to Orders',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
-                  TextField(
-                    controller: phoneController,
-                    decoration: InputDecoration(labelText: 'Phone Number'),
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) {
-                      phone = value;
-                    },
-                  ),
-                  SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context)
-                              .pop(); // Close modal without saving
-                        },
-                        child: Text('Cancel'),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          // Handle saving the new customer information
-
-                          _addCustomer(name, phone);
-
-                          setState(() {
-                            name = name;
-                            phone = phone;
-                          });
-                          Navigator.of(context).pop();
-                        },
-                        child: Text('Add Customer'),
-                      ),
-                    ],
-                  ),
+                  SizedBox(height: 60),
                 ],
               ),
             ),
