@@ -10,7 +10,7 @@ import 'package:intl/intl.dart';
 import 'dart:math';
 import 'receipt.dart';
 import 'package:http/http.dart' as http;
-import 'scanner.dart';
+//import 'scanner.dart';
 
 class CartOrderPage extends StatefulWidget {
   final Map<String, dynamic> order;
@@ -52,18 +52,18 @@ class _CartOrderPageState extends State<CartOrderPage> {
     loadPayment();
   }
 
-  void _navigateToScanner() async {
-    bool? result = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => BarcodeScannerPage()),
-    );
+  // void _navigateToScanner() async {
+  //   bool? result = await Navigator.push(
+  //     context,
+  //     MaterialPageRoute(builder: (context) => BarcodeScannerPage()),
+  //   );
 
-    if (result == true) {
-      setState(() {
-        loadCart(); // Refresh the cart or any needed data
-      });
-    }
-  }
+  //   if (result == true) {
+  //     setState(() {
+  //       loadCart(); // Refresh the cart or any needed data
+  //     });
+  //   }
+  // }
 
   void processCart() {
     Map<String, dynamic> salesData = widget.order;
@@ -135,16 +135,16 @@ class _CartOrderPageState extends State<CartOrderPage> {
   //   }
   // }
 
-  Future<void> _addCustomer(String name, String phone) async {
-    if (name.isEmpty) {
-      return;
-    }
-    setState(() {
-      customers.add({'name': name, 'phone': phone, 'sent': 'false'});
-    });
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('myCustomers', json.encode(customers));
-  }
+  // Future<void> _addCustomer(String name, String phone) async {
+  //   if (name.isEmpty) {
+  //     return;
+  //   }
+  //   setState(() {
+  //     customers.add({'name': name, 'phone': phone, 'sent': 'false'});
+  //   });
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   await prefs.setString('myCustomers', json.encode(customers));
+  // }
 
   Future<void> _sendUnsentCustomers() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -165,58 +165,58 @@ class _CartOrderPageState extends State<CartOrderPage> {
     await prefs.setString('myCustomers', json.encode(customers));
   }
 
-  Future<void> _fetchCustomer() async {
-    print('fetching new customers.');
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? storedCustomers = prefs.getString('myCustomers');
-    List<Map<String, dynamic>> customers = storedCustomers != null
-        ? List<Map<String, dynamic>>.from(json.decode(storedCustomers))
-        : [];
+  // Future<void> _fetchCustomer() async {
+  //   print('fetching new customers.');
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   String? storedCustomers = prefs.getString('myCustomers');
+  //   List<Map<String, dynamic>> customers = storedCustomers != null
+  //       ? List<Map<String, dynamic>>.from(json.decode(storedCustomers))
+  //       : [];
 
-    // Ensure no contact has 'sent' status of false
-    if (customers.any((customer) => customer['sent'] == 'false')) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Not Synchronized'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-      _sendUnsentCustomers();
-      return;
-    }
+  //   // Ensure no contact has 'sent' status of false
+  //   if (customers.any((customer) => customer['sent'] == 'false')) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text('Not Synchronized'),
+  //         duration: Duration(seconds: 2),
+  //       ),
+  //     );
+  //     _sendUnsentCustomers();
+  //     return;
+  //   }
 
-    String? token = prefs.getString('apiKey');
-    final url = Uri.parse('https://salespro.livepetal.com/v1/getcontact');
-    try {
-      final response = await http.get(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token'
-        },
-      );
+  //   String? token = prefs.getString('apiKey');
+  //   final url = Uri.parse('https://salespro.livepetal.com/v1/getcontact');
+  //   try {
+  //     final response = await http.get(
+  //       url,
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         'Authorization': 'Bearer $token'
+  //       },
+  //     );
 
-      if (response.statusCode == 200) {
-        List<Map<String, dynamic>> fetchedCustomers =
-            List<Map<String, dynamic>>.from(json.decode(response.body));
-        await prefs.setString('myCustomers', json.encode(fetchedCustomers));
+  //     if (response.statusCode == 200) {
+  //       List<Map<String, dynamic>> fetchedCustomers =
+  //           List<Map<String, dynamic>>.from(json.decode(response.body));
+  //       await prefs.setString('myCustomers', json.encode(fetchedCustomers));
 
-        setState(() {
-          customers = List<Map<String, String>>.from(
-              fetchedCustomers.map((e) => Map<String, String>.from(e)));
-        });
+  //       setState(() {
+  //         customers = List<Map<String, String>>.from(
+  //             fetchedCustomers.map((e) => Map<String, String>.from(e)));
+  //       });
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Contacts Synchronized'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
-    } catch (e) {
-      print('Error fetching customers: $e');
-    }
-  }
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(
+  //           content: Text('Contacts Synchronized'),
+  //           duration: Duration(seconds: 2),
+  //         ),
+  //       );
+  //     }
+  //   } catch (e) {
+  //     print('Error fetching customers: $e');
+  //   }
+  // }
 
   Future<bool> _sendToServer(Map<String, dynamic> customer) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -922,12 +922,12 @@ class _CartOrderPageState extends State<CartOrderPage> {
     );
   }
 
-  _noCustomerName() {
-    setState(() {
-      name = 'Customer';
-      phone = '';
-    });
-  }
+  // _noCustomerName() {
+  //   setState(() {
+  //     name = 'Customer';
+  //     phone = '';
+  //   });
+  // }
 
   void _showAddCustomerModal(BuildContext context) {
     showDialog(
