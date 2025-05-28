@@ -10,8 +10,10 @@ import 'constants.dart';
 import 'home_page.dart';
 import 'itemhistory.dart';
 import 'account.dart';
+import 'stock_management.dart';
 
 class DashboardScreen extends StatefulWidget {
+  const DashboardScreen({super.key});
   @override
   _DashboardScreenState createState() => _DashboardScreenState();
 }
@@ -140,7 +142,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       String imageName = imageUrl.split('/').last;
       String imagePath = '${appDocDir.path}/$imageName';
 
-      if (!File(imagePath).existsSync()) {
+      if (!File(imagePath).existsSync() && imageName.isNotEmpty) {
         try {
           await dio.download(imageUrl, imagePath);
           item['localImagePath'] = imagePath;
@@ -172,9 +174,39 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "$business",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "$business",
+              style: const TextStyle(
+                  color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+            Row(
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => AccountPage()),
+                    );
+                  },
+                  child: const Icon(Icons.person_outline, color: Colors.white),
+                ),
+                //const SizedBox(width: 2),
+                IconButton(
+                  icon: const Icon(Icons.menu, color: Colors.white),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const StockManagementPage()),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ],
         ),
         automaticallyImplyLeading: false,
         backgroundColor: primaryColor,
@@ -182,99 +214,92 @@ class _DashboardScreenState extends State<DashboardScreen> {
       body: Column(
         children: [
           // Search Bar
-       Container(
-  decoration: BoxDecoration(
-    color: primaryColor, // Deep orange background for the external container
-    borderRadius: BorderRadius.vertical(bottom: Radius.circular(16.0)), // Rounded corners at the bottom
-  ),
-  padding: const EdgeInsets.all(12.0),
-  child: Row(
-    children: [
-     Expanded(
-  child: TextField(
-    controller: searchController,
-    decoration: InputDecoration(
-      hintText: "Search your store...",
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8.0),
-        borderSide: BorderSide.none, // Remove border color
-      ),
-      prefixIcon: Icon(Icons.search, color: Colors.black), // Change icon color to black
-      filled: true,
-      fillColor: Colors.white, // Background color of the text field
-      hintStyle: TextStyle(color: Colors.black), // Hint text color
-      contentPadding: EdgeInsets.symmetric(vertical: 8.0), // Reduce height
-    ),
-  ),
-),
-      SizedBox(width: 8),
-      Stack(
-        children: [
-          IconButton(
-            icon: Icon(
-              Icons.shopping_cart_outlined,
-              color: Colors.white, // Change icon color to white
-              size: 28,
+          Container(
+            decoration: BoxDecoration(
+              color:
+                  primaryColor, // Deep orange background for the external container
+              borderRadius: const BorderRadius.vertical(
+                  bottom:
+                      Radius.circular(16.0)), // Rounded corners at the bottom
             ),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => HomePage(selectedIndex: 1),
-                ),
-              );
-            },
-          ),
-          if (cart.length > 0)
-            Positioned(
-              right: 2,
-              top: 8,
-              child: Container(
-                padding: EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                constraints: BoxConstraints(
-                  minWidth: 16,
-                  minHeight: 16,
-                ),
-                child: Text(
-                  '${cart.length}',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: searchController,
+                    decoration: InputDecoration(
+                      hintText: "Search your store...",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                        borderSide: BorderSide.none, // Remove border color
+                      ),
+                      prefixIcon: const Icon(Icons.search,
+                          color: Colors.black), // Change icon color to black
+                      filled: true,
+                      fillColor:
+                          Colors.white, // Background color of the text field
+                      hintStyle: const TextStyle(
+                          color: Colors.black), // Hint text color
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: 8.0), // Reduce height
+                    ),
                   ),
-                  textAlign: TextAlign.center,
                 ),
-              ),
+                const SizedBox(width: 8),
+                Stack(
+                  children: [
+                    IconButton(
+                      icon: const Icon(
+                        Icons.shopping_cart_outlined,
+                        color: Colors.white, // Change icon color to white
+                        size: 28,
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => HomePage(selectedIndex: 1),
+                          ),
+                        );
+                      },
+                    ),
+                    if (cart.isNotEmpty)
+                      Positioned(
+                        right: 2,
+                        top: 8,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.black,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 16,
+                            minHeight: 16,
+                          ),
+                          child: Text(
+                            '${cart.length}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 52,
+                ),
+              ],
             ),
-        ],
-      ),
-IconButton(
-  icon: Icon(
-    Icons.person_outline, // Use profile icon
-    color: Colors.white, // Keep icon color as white
-    size: 28,
-  ),
-  onPressed: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AccountPage(), // Update to navigate to the AccountPage
-      ),
-    );
-  },
-),
-
-      SizedBox(height: 52,),
-    ],
-  ),
-),
+          ),
           isFetching
-              ? Center(child: CircularProgressIndicator())
+              ? const Center(child: CircularProgressIndicator())
               : filteredItems.isEmpty
-                  ? Center(child: Text("No data available"))
+                  ? const Center(child: Text("No data available"))
                   : Expanded(
                       child: SingleChildScrollView(
                         child: Padding(
@@ -286,10 +311,13 @@ IconButton(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 0),
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 0),
                                     child: Text(
                                       entry.key,
-                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                      style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold),
                                     ),
                                   ),
                                   SizedBox(
@@ -298,26 +326,31 @@ IconButton(
                                       scrollDirection: Axis.horizontal,
                                       children: entry.value.map((item) {
                                         return Container(
-                                          margin: EdgeInsets.all(6.0),
+                                          margin: const EdgeInsets.all(6.0),
                                           decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(12.0),
+                                            borderRadius:
+                                                BorderRadius.circular(12.0),
                                             boxShadow: [
                                               BoxShadow(
-                                                color: Colors.grey.withOpacity(0.2),
+                                                color: Colors.grey
+                                                    .withOpacity(0.2),
                                                 blurRadius: 5,
                                                 spreadRadius: 2,
                                               ),
                                             ],
                                           ),
                                           child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(12.0),
+                                            borderRadius:
+                                                BorderRadius.circular(12.0),
                                             child: GestureDetector(
                                               onTap: () {
                                                 Navigator.push(
                                                   context,
                                                   MaterialPageRoute(
-                                                    builder: (context) => ItemHistoryPage(
-                                                      itemName: item['title'] ?? "No Title",
+                                                    builder: (context) =>
+                                                        ItemHistoryPage(
+                                                      itemName: item['title'] ??
+                                                          "No Title",
                                                       salesDate: selectedDate,
                                                     ),
                                                   ),
@@ -326,45 +359,82 @@ IconButton(
                                               child: Container(
                                                 width: 120,
                                                 child: Column(
-                                                  mainAxisAlignment: MainAxisAlignment.start,
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.start,
                                                   children: [
-                                                    item['localImagePath'] != null && File(item['localImagePath']).existsSync()
+                                                    item['localImagePath'] !=
+                                                                null &&
+                                                            File(item[
+                                                                    'localImagePath'])
+                                                                .existsSync()
                                                         ? Image.file(
-                                                            File(item['localImagePath']),
+                                                            File(item[
+                                                                'localImagePath']),
                                                             width: 120,
                                                             height: 120,
                                                             fit: BoxFit.cover,
                                                           )
-                                                        : Icon(
-                                                            Icons.image_not_supported,
+                                                        : const Icon(
+                                                            Icons
+                                                                .image_not_supported,
                                                             size: 120,
                                                             color: Colors.grey,
                                                           ),
-                                                    SizedBox(height: 5),
+                                                    const SizedBox(height: 5),
                                                     Text(
-                                                      item['title'] ?? "No Title",
+                                                      item['title'] ??
+                                                          "No Title",
                                                       textAlign: TextAlign.left,
                                                       maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
                                                     ),
                                                     Row(
-                                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
                                                       children: [
                                                         Text(
                                                           '₦${formatNumber(item['price'] ?? '0.00')}',
-                                                          style: TextStyle(fontWeight: FontWeight.bold),
+                                                          style: const TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold),
                                                         ),
                                                         Container(
-                                                          padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                                                          decoration: BoxDecoration(
-                                                            color: (item['qty'] ?? 0) > 0 ? Colors.green : Color.fromARGB(255, 177, 40, 30),
-                                                            borderRadius: BorderRadius.circular(12),
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .symmetric(
+                                                                  horizontal:
+                                                                      8.0,
+                                                                  vertical:
+                                                                      4.0),
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            color: (item['qty'] ??
+                                                                        0) >
+                                                                    0
+                                                                ? Colors.green
+                                                                : const Color
+                                                                    .fromARGB(
+                                                                    255,
+                                                                    177,
+                                                                    40,
+                                                                    30),
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        12),
                                                           ),
                                                           child: Text(
                                                             '${item['qty'] ?? '0'} ',
-                                                            style: TextStyle(
-                                                              color: Colors.white,
-                                                              fontWeight: FontWeight.bold,
+                                                            style:
+                                                                const TextStyle(
+                                                              color:
+                                                                  Colors.white,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
                                                             ),
                                                           ),
                                                         ),

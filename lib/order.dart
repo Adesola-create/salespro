@@ -88,10 +88,12 @@ String getDaySuffix(int day) {
   Future<void> fetchOrders() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   try {
+    final token = prefs.getString('token') ?? '';
+
     final response = await http.get(
       Uri.parse('https://salespro.livepetal.com/v1/businessorders'),
       headers: {
-        'Authorization': 'p2cjbobmwa1mraiv175hji7d5xwewetvwtvte',
+        'Authorization': 'Bearer $token',
       },
     );
 
@@ -261,64 +263,72 @@ void _sortOrdersByDate(List<Map<String, dynamic>>? ordersList) {
         itemCount: orderList.length,
         itemBuilder: (context, index) {
           var order = orderList[index];
-          return Card(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            elevation: 0,
-            margin: EdgeInsets.symmetric(vertical: 5),
-            child: ListTile(
-              leading: CircleAvatar(
-                backgroundColor: Colors.grey,
-                child: Icon(Icons.person, color: Colors.white),
-              ),
-              title: Text(order['customer_name'],
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('${order['phone']}',
-                      style: TextStyle(color: Colors.grey[700])),
-                ],
-              ),
- trailing: Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Text(
-             "₦${formatNumber(num.parse(order['total']))}",
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+return Card(
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+  elevation: 0,
+  margin: EdgeInsets.symmetric(vertical: 5),
+  child: ListTile(
+    leading: CircleAvatar(
+      backgroundColor: Colors.grey,
+      child: Icon(Icons.person, color: Colors.white),
+    ),
+    title: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Text(
+            order['customer_name'] ?? '',
+            style: TextStyle(fontWeight: FontWeight.bold),
+            overflow: TextOverflow.ellipsis, // Prevent overflow if the name is too long
           ),
-          Text(
-            formatSalesDate(order['salesdate'] ?? ''), // Correct string interpolation
-            style: TextStyle(fontSize: 12),
+        ),
+        Text(
+          "₦${formatNumber(num.parse(order['total'] ?? '0'))}",
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+        ),
+      ],
+    ),
+    subtitle: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Text(
+            '${order['phone'] ?? ''}',
+            style: TextStyle(color: Colors.grey[700]),
+            overflow: TextOverflow.ellipsis, // Prevent overflow if the phone number is too long
           ),
-        ],
-      ),
-      SizedBox(width: 8),
-      Icon(
-        Icons.arrow_forward_ios,
-        size: 16,
-        color: Colors.grey,
-      ),
-    ],
+        ),
+        Text(
+          formatSalesDate(order['salesdate'] ?? ''),
+          style: TextStyle(fontSize: 12),
+        ),
+      ],
+    ),
+    trailing: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          Icons.arrow_forward_ios,
+          size: 16,
+          color: Colors.grey,
+        ),
+      ],
+    ),
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => OrderDetailsPage(order: order),
+        ),
+      ).then((shouldRefresh) {
+        if (shouldRefresh == true) {
+          fetchOrders(); // Refresh the order list on the main page
+        }
+      });
+    },
   ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => OrderDetailsPage(order: order),
-                  ),
-                ).then((shouldRefresh) {
-                  if (shouldRefresh == true) {
-                    fetchOrders(); // Refresh the order list on the main page
-                  }
-                });
-              },
-            ),
-          );
-        },
+);
+       },
       ),
     );
   }

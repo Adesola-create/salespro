@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:salespro/constants.dart'; // Ensure this import is correct
+import 'package:shared_preferences/shared_preferences.dart';
 import 'cartorder.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
 import 'home_page.dart';
 
 class OrderDetailsPage extends StatefulWidget {
@@ -18,53 +18,76 @@ class OrderDetailsPage extends StatefulWidget {
 }
 
 class _OrderDetailsPageState extends State<OrderDetailsPage> {
-  Future<void> cancelOrder(String salesId, String authToken) async {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Processing...'),
-        duration: Duration(seconds: 2),
-      ),
+ Future<void> cancelOrder(String salesId, BuildContext context) async {
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(
+      content: Text('Processing...'),
+      duration: Duration(seconds: 2),
+    ),
+  );
+
+  final url = 'https://salespro.livepetal.com/v1/cancelorder';
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('apiKey') ?? ''; // Retrieve apiKey from SharedPreferences
+
+    if (token.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('API Key not found. Please login again.'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return; // Stop execution if the API key is not available
+    }
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token', // Include the Bearer token here
+      },
+      body: json.encode({
+        'salesid': salesId,
+      }),
     );
 
-    final url = 'https://salespro.livepetal.com/v1/cancelorder';
-    try {
-      String authToken = 'p2cjbobmwa1mraiv175hji7d5xwewetvwtvte';
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $authToken', // Include the Bearer token here
-        },
-        body: json.encode({
-          'salesid': salesId,
-        }),
+    if (response.statusCode == 200) {
+      // Handle successful cancellation
+      print('Order cancelled successfully!');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Order cancelled successfully!'),
+          duration: Duration(seconds: 2),
+        ),
       );
-
-      if (response.statusCode == 200) {
-        // Handle successful cancellation
-        print('Order cancelled successfully!');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Order cancelled successfully!'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HomePage(selectedIndex: 2),
-          ),
-        );
-      } else {
-        // Handle errors
-        print('Failed to cancel order: ${response.body}');
-      }
-    } catch (error) {
-      // Handle network errors or other unexpected errors
-      print('Error occurred: $error');
+      //  Navigator.push replacement to avoid context errors:
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => HomePage(selectedIndex: 2),
+        ),
+      );
+    } else {
+      // Handle errors
+      print('Failed to cancel order: ${response.body}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to cancel order: ${response.body}'),
+          duration: Duration(seconds: 3),
+        ),
+      );
     }
+  } catch (error) {
+    // Handle network errors or other unexpected errors
+    print('Error occurred: $error');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Error occurred: $error'),
+        duration: Duration(seconds: 3),
+      ),
+    );
   }
-
+}
   String formatNumber(num amount) {
     final formatter = NumberFormat('#,###', 'en_US');
     return formatter.format(amount);
@@ -92,8 +115,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
               child: GestureDetector(
                 onTap: () {
                   // Call the cancel order function with the salesid
-                  cancelOrder(widget.order['salesid'],
-                      'p2cjbobmwa1mraiv175hji7d5xwewetvwtvte'); // Pass the sales ID and auth token
+                  cancelOrder(widget.order['salesid'], context); // Pass the sales ID and auth token
                 },
                 child: Container(
                   padding: EdgeInsets.symmetric(

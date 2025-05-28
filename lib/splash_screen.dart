@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
+import 'business_info.dart';
 import 'constants.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
-// import 'home_page.dart';
-// import 'constants.dart';
+import 'home_page.dart';
+import 'login_page.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -22,7 +22,7 @@ class _SplashScreenState extends State<SplashScreen>
     super.initState();
 
     _animationController = AnimationController(
-      duration: const Duration(seconds: 6),
+      duration: const Duration(seconds: 4),
       vsync: this,
     );
 
@@ -32,15 +32,35 @@ class _SplashScreenState extends State<SplashScreen>
 
     _animationController.forward();
 
-    _navigateToIntro();
+    _navigateAfterSplash();
   }
 
-  
+  Future<void> _navigateAfterSplash() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isOnboarded = prefs.getBool('isOnboarded') ?? false;
+    final apikey = prefs.getString('apikey');
 
-  Future<void> _navigateToIntro() async {
-    await Future.delayed(const Duration(seconds:6));
-    Navigator.pushReplacementNamed(
-        context, '/login'); // Updated to navigate to IntroScreen
+    await Future.delayed(const Duration(seconds: 5));
+
+    if (apikey != null && apikey.isNotEmpty) {
+      // User is logged in
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const HomePage()),
+      );
+    } else if (!isOnboarded) {
+      // User has not completed onboarding
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const SetupAccountScreen()),
+      );
+    } else {
+      // User has onboarded but not logged in
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
+    }
   }
 
   @override
@@ -52,7 +72,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: primaryColor, // Change this to your primary color
+      color: primaryColor,
       height: MediaQuery.of(context).size.height,
       width: MediaQuery.of(context).size.width,
       child: Scaffold(
@@ -61,18 +81,11 @@ class _SplashScreenState extends State<SplashScreen>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Logo at the top
-              // Image.asset(
-              //   'assets/images/burger.jpg',
-              //   height: 160, // Adjust the size of the logo as needed
-              // ),
-              // const SizedBox(height: 2), // Add spacing between the logo and the text
-              // Animated text
               AnimatedBuilder(
                 animation: _typingAnimation,
                 builder: (context, child) {
                   return Text(
-                    'Salespro'.substring(
+                    'SalesPro'.substring(
                         0, (_typingAnimation.value * 'SalesPro'.length).ceil()),
                     style: const TextStyle(
                       color: Colors.white,

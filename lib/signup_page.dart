@@ -4,14 +4,18 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'constants.dart';
 import 'login_page.dart';
-import 'home_page.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
-import 'package:device_info_plus/device_info_plus.dart';
+import 'welcome_screen.dart';
 
-class PhoneNumberInput extends StatelessWidget {
+class PhoneNumberInput extends StatefulWidget {
   final TextEditingController controller;
-  const PhoneNumberInput({super.key, required this.controller});
+  const PhoneNumberInput({Key? key, required this.controller}) : super(key: key);
 
+  @override
+  _PhoneNumberInputState createState() => _PhoneNumberInputState();
+}
+
+class _PhoneNumberInputState extends State<PhoneNumberInput> {
   @override
   Widget build(BuildContext context) {
     return IntlPhoneField(
@@ -29,14 +33,14 @@ class PhoneNumberInput extends StatelessWidget {
       ),
       initialCountryCode: 'NG',
       onChanged: (phone) {
-        controller.text = phone.completeNumber;
+        widget.controller.text = phone.completeNumber;
       },
     );
   }
 }
 
 class SignupScreen extends StatefulWidget {
-  const SignupScreen({super.key});
+  const SignupScreen({Key? key}) : super(key: key);
 
   @override
   _SignupScreenState createState() => _SignupScreenState();
@@ -48,110 +52,85 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
 
   bool _isLoading = false;
   bool _isPasswordVisible = false;
-  bool _isConfirmPasswordVisible = false;
 
-  Future<void> getDeviceInfo() async {
-    final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
+Future<void> _signup() async {
+  final String firstName = _firstNameController.text.trim();
+  final String lastName = _lastNameController.text.trim();
+  final String phone = _phoneController.text.trim();
+  final String email = _emailController.text.trim();
+  final String password = _passwordController.text.trim();
 
-    if (Theme.of(context).platform == TargetPlatform.android) {
-      final androidInfo = await deviceInfoPlugin.androidInfo;
-      print('Android Device Info:');
-      print('ID: ${androidInfo.id}');
-      print('Brand: ${androidInfo.brand}');
-      print('Model: ${androidInfo.model}');
-      print('Android Version: ${androidInfo.version.release}');
-      print('SDK Level: ${androidInfo.version.sdkInt}');
-    } else if (Theme.of(context).platform == TargetPlatform.iOS) {
-      final iosInfo = await deviceInfoPlugin.iosInfo;
-      print('iOS Device Info:');
-      print('Name: ${iosInfo.name}');
-      print('Model: ${iosInfo.model}');
-      print('System Name: ${iosInfo.systemName}');
-      print('System Version: ${iosInfo.systemVersion}');
-      print('Identifier for Vendor: ${iosInfo.identifierForVendor}');
-    }
+  setState(() {
+    _isLoading = true;
+  });
+
+  final Uri url = Uri.parse('https://salespro.livepetal.com/v1/signupstaff');
+  final Map<String, String> body = {
+    'firstname': firstName,
+    'lastname': lastName,
+    'phone': phone,
+    'email': email,
+    'password': password,
+  };
+
+  try {
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json', 
+        'Authorization': 'Bearer signupfromandroid',
+      },
+      body: jsonEncode(body),
+    );
+
+    final Map<String, dynamic> responseBody = json.decode(response.body);
+    print('Response: $responseBody');
+
+    if (responseBody['status'] == 'success') {
+      final userData = responseBody['data'];
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('userId', userData['id'].toString());
+      await prefs.setString('userName', '${userData['firstname']} ${userData['lastname']}');
+
+        if (userData['apikey'] != null) {
+    await prefs.setString('apikey', userData['apikey']);
+    print("Saved API key: ${userData['apikey']}");
+  } else {
+    print("No API key found in response.");
   }
 
-  Future<void> _signup() async {
-    final String firstName = _firstNameController.text.trim();
-    final String lastName = _lastNameController.text.trim();
-    final String phone = _phoneController.text.trim();
-    final String email = _emailController.text.trim();
-    final String password = _passwordController.text.trim();
-    final String confirmPassword = _confirmPasswordController.text.trim();
-
-    if (password != confirmPassword) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const WelcomeScreen(),
+        ),
+      );
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Passwords do not match!"),
+        SnackBar(
+          content: Text(responseBody['message']),
           backgroundColor: Colors.black,
         ),
       );
-      return;
     }
-
+  } catch (error) {
+    print("Signup Error: $error");
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("An error occurred. Please try again."),
+        backgroundColor: Colors.black,
+      ),
+    );
+  } finally {
     setState(() {
-      _isLoading = true;
+      _isLoading = false;
     });
-
-    final Uri url = Uri.parse('https://api.braveiq.net/v1/signup');
-    try {
-      final response = await http.post(
-        url,
-        body: {
-          'firstname': firstName,
-          'lastname': lastName,
-          'phone': phone,
-          'email': email,
-          'password': password,
-          // 'device_name': deviceName ?? 'Unknown',
-          // 'device_id': deviceId ?? 'Unknown',
-          // 'device_brand': deviceBrand ?? 'Unknown',
-        },
-        headers: {
-          'Authorization': 'Bearer 123456789Token',
-        },
-      );
-
-      final Map<String, dynamic> responseBody = json.decode(response.body);
-
-      if (responseBody['status'] == 'success') {
-        final data = jsonDecode(response.body);
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('userId', data['user']['id']);
-        await prefs.setString('userName', data['user']['name']);
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const HomePage(),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(responseBody['message']),
-            backgroundColor: Colors.black,
-          ),
-        );
-      }
-    } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("An error occurred. Please try again."),
-          backgroundColor: Colors.black,
-        ),
-      );
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -165,7 +144,6 @@ class _SignupScreenState extends State<SignupScreen> {
               const SizedBox(height: 75),
               const Text(
                 'Signup',
-                textAlign: TextAlign.left,
                 style: TextStyle(
                   fontSize: 38,
                   fontWeight: FontWeight.bold,
@@ -174,7 +152,6 @@ class _SignupScreenState extends State<SignupScreen> {
               ),
               const Text(
                 'Signup to create your account',
-                textAlign: TextAlign.left,
                 style: TextStyle(
                   fontSize: 18,
                   color: Colors.grey,
@@ -247,9 +224,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _isPasswordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
+                      _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
                       color: Colors.grey,
                     ),
                     onPressed: () {
@@ -260,36 +235,6 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
                 obscureText: !_isPasswordVisible,
-              ),
-              const SizedBox(height: 14),
-              TextField(
-                controller: _confirmPasswordController,
-                decoration: InputDecoration(
-                  labelText: 'Confirm Password',
-                  labelStyle: const TextStyle(color: Colors.grey),
-                  border: const OutlineInputBorder(
-                    borderSide: BorderSide(color: primaryColor),
-                    borderRadius: BorderRadius.all(Radius.circular(16.0)),
-                  ),
-                  focusedBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: primaryColor, width: 2.0),
-                    borderRadius: BorderRadius.all(Radius.circular(16.0)),
-                  ),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _isConfirmPasswordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                      color: Colors.grey,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
-                      });
-                    },
-                  ),
-                ),
-                obscureText: !_isConfirmPasswordVisible,
               ),
               const SizedBox(height: 30),
               SizedBox(
@@ -306,21 +251,18 @@ class _SignupScreenState extends State<SignupScreen> {
                   child: _isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
                       : const Text(
-                          'Sign Up Now',
+                          'Continue',
                           style: TextStyle(fontSize: 18, color: Colors.white),
                         ),
                 ),
               ),
               TextButton(
-                onPressed: _isLoading
-                    ? null
-                    : () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const LoginScreen()),
-                        );
-                      },
+                onPressed: _isLoading ? null : () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LoginScreen()),
+                  );
+                },
                 child: const Text(
                   "Already have an account? Login",
                   style: TextStyle(color: primaryColor),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 // import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'login_page.dart';
-//import 'chat.dart';
 
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
@@ -16,9 +15,9 @@ class _AccountPageState extends State<AccountPage> {
   String userEmail = '';
   String userPhone = '';
   String userId = '';
-  String business = ''; // Company Name
-  String services = ''; // Services Offered
-  String address = ''; // Business Address
+  String business = '';
+  String services = ''; 
+  String address = ''; 
 
   @override
   void initState() {
@@ -61,6 +60,57 @@ class _AccountPageState extends State<AccountPage> {
     });
   }
 
+  Future<void> logoutUser(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (route) => false,
+    );
+  }
+
+  Future<void> _updateField(String field, String currentValue) async {
+    final TextEditingController controller = TextEditingController(text: currentValue);
+    
+    String? newValue = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Edit ${field}'),
+        content: TextField(
+          controller: controller,
+          decoration: InputDecoration(hintText: 'Enter new ${field}'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, controller.text),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+
+    if (newValue != null) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(field.toLowerCase(), newValue);
+      setState(() {
+        switch (field.toLowerCase()) {
+          case 'services':
+            services = newValue;
+            break;
+          case 'address':
+            address = newValue;
+            break;
+        }
+      });
+    }
+  }
+
   Widget _buildGroupedSection(List<Widget> tiles) {
     return Container(
       decoration: BoxDecoration(
@@ -85,20 +135,35 @@ class _AccountPageState extends State<AccountPage> {
     return ListTile(
       leading: Icon(icon),
       title: Text(title, style: const TextStyle(fontSize: 14)),
-      subtitle: value.length > 30 // If long, move it to subtitle
+      subtitle: value.length > 30
           ? Text(
               value,
               style: const TextStyle(fontSize: 14),
               overflow: TextOverflow.ellipsis,
-              maxLines: 2, // Limits to 2 lines
+              maxLines: 2,
             )
           : null,
-      trailing: value.length > 30
-          ? null // Removes trailing if text is long
-          : Text(
-              value,
-              style: const TextStyle(fontSize: 14),
-            ),
+      trailing: title == 'Services' || title == 'Address'
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (value.length <= 30) 
+                  Text(
+                    value,
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () => _updateField(title, value),
+                ),
+              ],
+            )
+          : value.length > 30
+              ? null
+              : Text(
+                  value,
+                  style: const TextStyle(fontSize: 14),
+                ),
       onTap: onTap,
     );
   }
@@ -134,46 +199,20 @@ class _AccountPageState extends State<AccountPage> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    SharedPreferences.getInstance().then((prefs) {
-                      prefs.remove('userEmail');
-                    });
-                    _checkLoginStatus();
+                    logoutUser(context);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.grey,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14.0),
                   ),
-                  child: const Text('Log Out',
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    'Log Out',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
             ),
-
-// const SizedBox(height: 16.0),
-//             Center(
-//               child: SizedBox(
-//                 width: double.infinity,
-//                 child: ElevatedButton(
-//                   onPressed: () {
-//                     Navigator.push(
-//                       context,
-//                       MaterialPageRoute(builder: (context) =>  ChatScreen()),
-//                     );
-//                   },
-//                   style: ElevatedButton.styleFrom(
-//                     backgroundColor: Colors.blue,
-//                     foregroundColor: Colors.white,
-//                     padding: const EdgeInsets.symmetric(vertical: 14.0),
-//                   ),
-//                   child: const Text('Go to Chat',
-//                       style:
-//                           TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-//                 ),
-//               ),
-//             ),
-
             const SizedBox(height: 16.0),
             const Center(child: Text('Version 1.0.1 (0167)')),
           ],

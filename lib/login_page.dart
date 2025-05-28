@@ -4,10 +4,8 @@ import 'home_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert'; // For jsonDecode
-// import 'signup_page.dart';
-//import 'forgot_password.dart';
-
-import 'dart:async';
+import 'signup_page.dart';
+import 'welcome_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -22,7 +20,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
   bool _isPasswordVisible = false; // State for password visibility
-  String business = '';
 
   @override
   void initState() {
@@ -33,7 +30,6 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _checkLoginStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userEmail = prefs.getString('userEmail');
-    String business1 = prefs.getString('business') ?? '';
 
     if (userEmail != null && userEmail.isNotEmpty) {
       // If a user is logged in, navigate to the dashboard
@@ -42,9 +38,6 @@ class _LoginScreenState extends State<LoginScreen> {
         MaterialPageRoute(builder: (context) => const HomePage()),
       );
     }
-    setState(() {
-      business = business1;
-    });
   }
 
   Future<void> _login(BuildContext context) async {
@@ -69,18 +62,15 @@ class _LoginScreenState extends State<LoginScreen> {
           'password': password,
         },
         headers: {},
-      ).timeout(const Duration(seconds: 60));
+      ).timeout(const Duration(seconds: 120));
 
-      // print(response.body);
       final data = jsonDecode(response.body);
       final user = data['data'];
       if (response.statusCode == 200) {
         if (data['status'] == 'success') {
           final prefs = await SharedPreferences.getInstance();
-          //await prefs.setString('userData', jsonEncode(user));
-          await prefs.setString('userId', user['id']);
-          await prefs.setString(
-              'userName', '${user['firstname']} ${user['lastname']}');
+           await prefs.setString('userId', user['id']);
+          await prefs.setString('userName', '${user['firstname']} ${user['lastname']}');
           await prefs.setString('userEmail', user['email']);
           await prefs.setString('userPhone', user['phone']);
           await prefs.setString('businessphone', user['businessphone']);
@@ -92,15 +82,21 @@ class _LoginScreenState extends State<LoginScreen> {
           await prefs.setString('address', user['address'] ?? '');
           await prefs.setInt('editPrice', user['editprice']);
 
-          // print(jsonEncode(user));
-          //  print(user['businessphone']);
-          //  print(user['editprice']);
-
-          //end of fetching
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const HomePage()),
-          );
+          // Check if business information is present
+          String businessInfo = user['business'] ?? '';
+          if (businessInfo.isNotEmpty) {
+            // Navigate to HomePage if business info exists
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HomePage()),
+            );
+          } else {
+            // Navigate to SetupAccountScreen if business info is missing
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+            );
+          }
         } else {
           _showErrorDialog(context, data['message']);
         }
@@ -149,20 +145,6 @@ class _LoginScreenState extends State<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 100),
-                Center(
-                  child: Text(
-                    business,
-                    style: TextStyle(
-                      fontSize: 38,
-                      fontWeight: FontWeight.bold,
-                      color: primaryColor,
-                    ),
-                  ),
-                ),
-
-                SizedBox(
-                  height: 65,
-                ),
                 const Text(
                   'Login',
                   style: TextStyle(
@@ -229,8 +211,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                     ),
                   ),
-                  obscureText:
-                      !_isPasswordVisible, // Toggle password visibility
+                  obscureText: !_isPasswordVisible,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your password';
@@ -238,20 +219,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     return null;
                   },
                 ),
-                // const SizedBox(height: 6),
-                // TextButton(
-                //   onPressed: () {
-                //     Navigator.push(
-                //       context,
-                //       MaterialPageRoute(
-                //           builder: (context) => const ForgotPassword()),
-                //     );
-                //   },
-                //   child: const Text(
-                //     "Forgot Password?",
-                //     style: TextStyle(color: Colors.black),
-                //   ),
-                // ),
                 const SizedBox(height: 20),
                 SizedBox(
                   width: double.infinity,
@@ -274,20 +241,20 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                   ),
                 ),
-                // const SizedBox(height: 20),
-                // TextButton(
-                //   onPressed: () {
-                //     Navigator.push(
-                //       context,
-                //       MaterialPageRoute(
-                //           builder: (context) => const SignupScreen()),
-                //     );
-                //   },
-                // child: const Text(
-                //   "Don't have an account? Sign Up",
-                //   style: TextStyle(color: primaryColor),
-                // ),
-                // ),
+                const SizedBox(height: 20),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const SignupScreen()),
+                    );
+                  },
+                  child: const Text(
+                    "Don't have an account? Sign Up",
+                    style: TextStyle(color: primaryColor),
+                  ),
+                ),
               ],
             ),
           ),
