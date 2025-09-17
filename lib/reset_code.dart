@@ -62,14 +62,14 @@ class _ResetCodeScreenState extends State<ResetCodeScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Error'),
+          title: const Text('Error'),
           content: Text(message),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('OK'),
+              child: const Text('OK'),
             ),
           ],
         );
@@ -85,8 +85,8 @@ class _ResetCodeScreenState extends State<ResetCodeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 100),
-            Text(
+            const SizedBox(height: 100),
+            const Text(
               'Verify Code',
               style: TextStyle(
                 fontSize: 28,
@@ -94,12 +94,12 @@ class _ResetCodeScreenState extends State<ResetCodeScreen> {
                 color: primaryColor,
             ),
             ),
-            SizedBox(height: 20),
-            Text(
+            const SizedBox(height: 20),
+            const Text(
               'Enter the 4-digit code sent to your email',
               style: TextStyle(fontSize: 18),
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: List.generate(4, (index) {
@@ -110,8 +110,8 @@ class _ResetCodeScreenState extends State<ResetCodeScreen> {
                     keyboardType: TextInputType.number,
                     maxLength: 1,
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    decoration: InputDecoration(
+                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    decoration: const InputDecoration(
                       counterText: '', // hides the counter below each input
                       border: OutlineInputBorder(),
                     ),
@@ -126,19 +126,19 @@ class _ResetCodeScreenState extends State<ResetCodeScreen> {
                 );
               }),
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryColor,
-                  padding: EdgeInsets.symmetric(vertical: 18, horizontal: 15),
+                  padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(18),
                   ),
                 ),
                 onPressed: _verifyCode,
-                child: Text(
+                child: const Text(
                   'Verify Code',
                   style: TextStyle(fontSize: 16, color: Colors.white),
                 ),

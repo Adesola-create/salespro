@@ -79,14 +79,14 @@ class _ForgotPasswordState extends State<ForgotPassword> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Error'),
+          title: const Text('Error'),
           content: Text(message),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('OK'),
+              child: const Text('OK'),
             ),
           ],
         );
@@ -102,8 +102,8 @@ class _ForgotPasswordState extends State<ForgotPassword> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 120),
-            Text(
+            const SizedBox(height: 120),
+            const Text(
               'Forgot Password',
               style: TextStyle(
                 fontSize: 28,
@@ -111,12 +111,12 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                 color: Colors.deepOrange,
               ),
             ),
-            SizedBox(height: 10),
-            Text(
+            const SizedBox(height: 10),
+            const Text(
               'Enter your email to receive password reset code',
               style: TextStyle(fontSize: 18),
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             TextField(
               controller: _emailController,
               autofocus: true, // Enable autofocus
@@ -128,21 +128,21 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                 ),
               ),
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryColor,
-                  padding: EdgeInsets.symmetric(vertical: 18, horizontal: 15),
+                  padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(18),
                   ),
                 ),
                 onPressed: _isLoading ? null : _sendResetCode,
                 child: _isLoading
-                    ? CircularProgressIndicator(color: Colors.white)
-                    : Text(
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text(
                         'Send Reset Code',
                         style: TextStyle(fontSize: 16, color: Colors.white),
                       ),

@@ -119,7 +119,7 @@ class _SignupScreenState extends State<SignupScreen> {
       );
 
       final Map<String, dynamic> responseBody = json.decode(response.body);
-      print('response body is ......${responseBody}');
+      print('response body is ......$responseBody');
       if (responseBody['status'] == 'success') {
         final data = jsonDecode(response.body);
         final prefs = await SharedPreferences.getInstance();
@@ -131,7 +131,7 @@ class _SignupScreenState extends State<SignupScreen> {
             builder: (context) => const WelcomeScreen(),
           ),
         );
-        print('response body is ......${responseBody}');
+        print('response body is ......$responseBody');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

@@ -77,10 +77,10 @@ class _AccountPageState extends State<AccountPage> {
     String? newValue = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Edit ${field}'),
+        title: Text('Edit $field'),
         content: TextField(
           controller: controller,
-          decoration: InputDecoration(hintText: 'Enter new ${field}'),
+          decoration: InputDecoration(hintText: 'Enter new $field'),
         ),
         actions: [
           TextButton(

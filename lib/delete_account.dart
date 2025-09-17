@@ -127,7 +127,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
             TextField(
               controller: _reasonController,
               maxLines: 4,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText:
                     'Please explain why you want to delete your account...',
                 border: OutlineInputBorder(),
@@ -137,7 +137,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
             ),
             const SizedBox(height: 20),
             _isLoading
-                ? Center(child: CircularProgressIndicator())
+                ? const Center(child: CircularProgressIndicator())
                 : Container(
                     margin: const EdgeInsets.only(bottom: 10),
                     width: double.infinity,

@@ -6,7 +6,7 @@ import 'categories.dart';
 
 
 class StockManagementPage extends StatefulWidget {
-  const StockManagementPage({Key? key}) : super(key: key);
+  const StockManagementPage({super.key});
 
   @override
   State<StockManagementPage> createState() => _StockManagementPageState();
@@ -69,7 +69,7 @@ class _StockManagementPageState extends State<StockManagementPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => CategoriesPage(availableCategories: availableCategories, categoryProductCounts: categoryProductCounts,),
+                  builder: (context) => const CategoriesPage(),
                 ),
               );
             },

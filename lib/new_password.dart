@@ -94,8 +94,8 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 30),
-            Text(
+            const SizedBox(height: 30),
+            const Text(
               'New Password',
               style: TextStyle(
                 fontSize: 28,
@@ -103,12 +103,12 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                 color: primaryColor,
             ),
             ),
-            SizedBox(height: 20),
-            Text(
+            const SizedBox(height: 20),
+            const Text(
               'Create new password for your account',
               style: TextStyle(fontSize: 18),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             TextFormField(
               controller: _passwordController,
               decoration: InputDecoration(
@@ -152,7 +152,7 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.purple,
-                  padding: EdgeInsets.symmetric(vertical: 18, horizontal: 15),
+                  padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(18),
                   ),

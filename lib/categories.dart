@@ -5,14 +5,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 class CategoriesPage extends StatefulWidget {
-  final List<String> availableCategories;
-  final Map<String, int> categoryProductCounts;
+  // final List<String> availableCategories;
+  // final Map<String, int> categoryProductCounts;
 
   const CategoriesPage({
-    Key? key,
-    required this.availableCategories,
-    required this.categoryProductCounts,
-  }) : super(key: key);
+    super.key,
+    // required this.availableCategories,
+    // required this.categoryProductCounts,
+  });
 
   @override
   State<CategoriesPage> createState() => _CategoriesPageState();
@@ -23,10 +23,13 @@ class _CategoriesPageState extends State<CategoriesPage> {
   void initState() {
     super.initState();
     // If the categoryProductCounts map is empty, calculate product counts
-    if (widget.categoryProductCounts.isEmpty) {
-      _calculateProductCounts();
-    }
+    // if (widget.categoryProductCounts.isEmpty) {
+    _calculateProductCounts();
+    //}
   }
+
+  List<String> availableCategories = [];
+  final Map<String, int> categoryProductCounts = {};
 
   // Method to calculate the number of products in each category
   Future<void> _calculateProductCounts() async {
@@ -37,16 +40,20 @@ class _CategoriesPageState extends State<CategoriesPage> {
       List<dynamic> products = json.decode(itemDataString);
 
       // Count products by category
+    Set<String> uniqueCategories = {};
       Map<String, int> counts = {};
       for (var product in products) {
         String category = product['category'] ?? 'Uncategorized';
-        counts[category] = (counts[category] ?? 0) + 1;
+        counts[category] = (counts[category] ?? 0) + 1;  
+        uniqueCategories.add(product['category'].toString());
       }
+
+
 
       // Update the counts in the widget's map
       setState(() {
-        widget.categoryProductCounts.clear();
-        widget.categoryProductCounts.addAll(counts);
+        categoryProductCounts.addAll(counts);
+        availableCategories = uniqueCategories.toList();
       });
     }
   }
@@ -62,14 +69,14 @@ class _CategoriesPageState extends State<CategoriesPage> {
         backgroundColor: primaryColor,
       ),
       body: ListView.builder(
-        itemCount: widget.availableCategories.length,
+        itemCount: availableCategories.length,
         itemBuilder: (context, index) {
-          String category = widget.availableCategories[index];
+          String category = availableCategories[index];
           // Get product count inside build method to ensure it updates
-          int productCount = widget.categoryProductCounts[category] ?? 0;
+          int productCount = categoryProductCounts[category] ?? 0;
 
           return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
             child: Container(
               margin: const EdgeInsets.symmetric(vertical: 4.0),
               decoration: BoxDecoration(
@@ -109,10 +116,9 @@ class _CategoriesPageState extends State<CategoriesPage> {
                     await _calculateProductCounts();
                     setState(() {
                       // Replace old name in availableCategories
-                      final index =
-                          widget.availableCategories.indexOf(category);
+                      final index = availableCategories.indexOf(category);
                       if (index != -1) {
-                        widget.availableCategories[index] = updatedName;
+                        availableCategories[index] = updatedName;
                       }
                     });
                   }
@@ -129,8 +135,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
 class CategoryProductsPage extends StatefulWidget {
   final String category;
 
-  const CategoryProductsPage({Key? key, required this.category})
-      : super(key: key);
+  const CategoryProductsPage({super.key, required this.category});
 
   @override
   _CategoryProductsPageState createState() => _CategoryProductsPageState();
@@ -266,7 +271,7 @@ class _CategoryProductsPageState extends State<CategoryProductsPage> {
         itemBuilder: (context, index) {
           final product = categoryProducts[index];
           return Container(
-            margin: const EdgeInsets.only(bottom: 4.0),
+            margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(8.0),
@@ -284,7 +289,7 @@ class _CategoryProductsPageState extends State<CategoryProductsPage> {
               ],
             ),
             child: ListTile(
-              contentPadding: const EdgeInsets.all(4.0),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 8.0),
               title: Text(
                 product['title'] ?? 'Unnamed Product',
                 style: const TextStyle(
@@ -298,15 +303,7 @@ class _CategoryProductsPageState extends State<CategoryProductsPage> {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Text(
-                        '₦${product['price']?.toString() ?? '0.00'}',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
+                    
                       Text(
                         'Quantity: ${product['quantity']?.toString() ?? '0'}',
                         style: const TextStyle(
@@ -318,6 +315,13 @@ class _CategoryProductsPageState extends State<CategoryProductsPage> {
                   ),
                 ],
               ),
+              trailing: Text(
+                         '₦${product['price']?.toString() ?? '0.00'}',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
+            ),
             ),
           );
         },

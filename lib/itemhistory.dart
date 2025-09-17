@@ -9,7 +9,7 @@ class ItemHistoryPage extends StatefulWidget {
   final String itemName;
   final DateTime salesDate;
 
-  ItemHistoryPage({required this.itemName, required this.salesDate});
+  const ItemHistoryPage({super.key, required this.itemName, required this.salesDate});
 
   @override
   _ItemHistoryPageState createState() => _ItemHistoryPageState();
@@ -108,7 +108,7 @@ class _ItemHistoryPageState extends State<ItemHistoryPage> {
         }
       },
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
         decoration: BoxDecoration(
           color: isSelected ? primaryColor : Colors.white,
           border: Border.all(color: Colors.grey),
@@ -126,7 +126,7 @@ class _ItemHistoryPageState extends State<ItemHistoryPage> {
                 shape: BoxShape.circle,
               ),
             ),
-          SizedBox(width: 8), // Add space between the indicator and the label
+          const SizedBox(width: 8), // Add space between the indicator and the label
           Center(
             child: Text(
               label,
@@ -153,7 +153,7 @@ class _ItemHistoryPageState extends State<ItemHistoryPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Item History: ${widget.itemName}',
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
       ),
       body: Column(
         children: [
@@ -161,12 +161,12 @@ class _ItemHistoryPageState extends State<ItemHistoryPage> {
           SingleChildScrollView(
             controller: _scrollController,
             scrollDirection: Axis.horizontal,
-            padding: EdgeInsets.all(10),
+            padding: const EdgeInsets.all(10),
             child: Row(
               children: [
                 // Add the "All" button at the start
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: _buildFilterButton(DateTime.now(),
                       isAll: true), // "All" button
                 ),
@@ -175,7 +175,7 @@ class _ItemHistoryPageState extends State<ItemHistoryPage> {
                   DateTime date =
                       DateTime.now().subtract(Duration(days: 9 - index));
                   return Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
                     child: _buildFilterButton(date),
                   );
                 }),
@@ -186,7 +186,7 @@ class _ItemHistoryPageState extends State<ItemHistoryPage> {
           // Transactions List
           Expanded(
             child: _isLoading
-                ? Center(child: CircularProgressIndicator())
+                ? const Center(child: CircularProgressIndicator())
                 : _transactionLogs.isEmpty
                     ? Center(
                         child: Text(
@@ -199,7 +199,7 @@ class _ItemHistoryPageState extends State<ItemHistoryPage> {
                           final name = log['name'];
 
                           return Container(
-                            margin: EdgeInsets.symmetric(
+                            margin: const EdgeInsets.symmetric(
                                 vertical: 4, horizontal: 14),
                             decoration: BoxDecoration(
                               border: Border.all(color: Colors.grey),
@@ -209,7 +209,7 @@ class _ItemHistoryPageState extends State<ItemHistoryPage> {
                             child: ListTile(
                               title: Text(
                                 '$name: ₦${NumberFormat('#,###').format(total)}',
-                                style: TextStyle(fontWeight: FontWeight.bold),
+                                style: const TextStyle(fontWeight: FontWeight.bold),
                               ),
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -221,13 +221,13 @@ class _ItemHistoryPageState extends State<ItemHistoryPage> {
                                               .itemName) // Filter items by name
                                       .map<Widget>((item) => Text(
                                             'Qty: ${item['qty']}, Price: ₦${NumberFormat('#,###').format(item['price'])}, Amount: ₦${NumberFormat('#,###').format(item['amount'])}',
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                                 color: Colors.black87),
                                           ))
                                       .toList(),
                                 ],
                               ),
-                              trailing: Icon(Icons.chevron_right),
+                              trailing: const Icon(Icons.chevron_right),
                               onTap: () {
                                 Navigator.push(
                                   context,

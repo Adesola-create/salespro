@@ -11,7 +11,7 @@ class OrderDetailsPage extends StatefulWidget {
   final Map<String, dynamic> order; // Field to hold order data
 
   // Constructor to accept the order data
-  const OrderDetailsPage({Key? key, required this.order}) : super(key: key);
+  const OrderDetailsPage({super.key, required this.order});
 
   @override
   _OrderDetailsPageState createState() => _OrderDetailsPageState();
@@ -26,7 +26,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
     ),
   );
 
-  final url = 'https://salespro.livepetal.com/v1/cancelorder';
+  const url = 'https://salespro.livepetal.com/v1/cancelorder';
   try {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('apiKey') ?? ''; // Retrieve apiKey from SharedPreferences
@@ -64,7 +64,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       //  Navigator.push replacement to avoid context errors:
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => HomePage(selectedIndex: 2),
+          builder: (context) => const HomePage(selectedIndex: 2),
         ),
       );
     } else {
@@ -73,7 +73,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to cancel order: ${response.body}'),
-          duration: Duration(seconds: 3),
+          duration: const Duration(seconds: 3),
         ),
       );
     }
@@ -83,7 +83,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Error occurred: $error'),
-        duration: Duration(seconds: 3),
+        duration: const Duration(seconds: 3),
       ),
     );
   }
@@ -118,7 +118,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                   cancelOrder(widget.order['salesid'], context); // Pass the sales ID and auth token
                 },
                 child: Container(
-                  padding: EdgeInsets.symmetric(
+                  padding: const EdgeInsets.symmetric(
                       horizontal: 20, vertical: 10), // Padding around the text
                   decoration: BoxDecoration(
                     color: Colors.transparent, // Background color of the button
@@ -126,7 +126,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                         color: Colors.white, width: 1), // Grey border
                     borderRadius: BorderRadius.circular(8), // Rounded corners
                   ),
-                  child: Text(
+                  child: const Text(
                     'Cancel Order',
                     style: TextStyle(
                       color: Colors.white, // Text color
@@ -144,7 +144,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
           children: [
             // Check if the cart has items
             if (cartItems.isEmpty)
-              Center(child: Text('No items in this order.'))
+              const Center(child: Text('No items in this order.'))
             else
               Expanded(
                 child: ListView.builder(
@@ -160,22 +160,22 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10)),
                       elevation: 0,
-                      margin: EdgeInsets.symmetric(vertical: 5),
+                      margin: const EdgeInsets.symmetric(vertical: 5),
                       child: ListTile(
                         leading:
                             (item['image'] != null && item['image'].isNotEmpty)
                                 ? Image.network(item['image'],
                                     width: 50, height: 50, fit: BoxFit.cover)
-                                : Icon(Icons.image_not_supported,
+                                : const Icon(Icons.image_not_supported,
                                     size: 50, color: Colors.grey),
                         title: Text(item['title'] ?? 'Unnamed Item',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
+                            style: const TextStyle(fontWeight: FontWeight.bold)),
                         subtitle: Text(
                             '$qty x ₦${formatNumber(item['price'])}',
                             style: TextStyle(color: Colors.grey[700])),
                         trailing: Text(
                           '₦${formatNumber(total)}',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
                           ),
@@ -193,7 +193,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primaryColor,
-                      padding: EdgeInsets.symmetric(vertical: 12),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8)),
                     ),
@@ -208,7 +208,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                         ),
                       );
                     },
-                    child: Text('Process Order',
+                    child: const Text('Process Order',
                         style: TextStyle(fontSize: 16, color: Colors.white)),
                   ),
                 ),

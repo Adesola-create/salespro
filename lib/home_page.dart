@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'dashboard2.dart';
 import 'order.dart';
-import 'dashboard.dart'; // Import your other pages
+//import 'dashboard.dart';
 import 'cart.dart';
 import 'history.dart';
 import 'overview.dart';
@@ -19,7 +20,8 @@ class _HomePageState extends State<HomePage> {
 
   // List of pages to display when navigating using BottomNavBar
   final List<Widget> _pages = [
-    DashboardScreen(), 
+    //DashboardScreen(), 
+    DashboardPage(), 
     POSHomePage(), 
     OrderPage(),
     HistoryPage(), 

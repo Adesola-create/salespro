@@ -7,6 +7,8 @@ import 'constants.dart';
 import 'itemhistory.dart';
 
 class OverviewPage extends StatefulWidget {
+  const OverviewPage({super.key});
+
   @override
   _OverviewPageState createState() => _OverviewPageState();
 }
@@ -36,7 +38,7 @@ class _OverviewPageState extends State<OverviewPage> {
     if (_scrollController.hasClients) {
       _scrollController.animateTo(
         _scrollController.position.maxScrollExtent,
-        duration: Duration(milliseconds: 500),
+        duration: const Duration(milliseconds: 500),
         curve: Curves.easeOut,
       );
     }
@@ -245,18 +247,18 @@ class _OverviewPageState extends State<OverviewPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Sales Overview',
+        title: const Text('Sales Overview',
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
         automaticallyImplyLeading: false,
       ),
       body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Date Filter Buttons
-               Container(
+               SizedBox(
       height: 70, // Set a fixed height for the container
       child: SingleChildScrollView(
             controller: _scrollController, 
@@ -267,7 +269,7 @@ class _OverviewPageState extends State<OverviewPage> {
       ),
     ),
 
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
 
               // Grand Total Card
               Card(
@@ -277,11 +279,11 @@ class _OverviewPageState extends State<OverviewPage> {
                 ),
                 color: primaryColor, // Highlight color
                 child: Padding(
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
+                      const Text(
                         "Grand Total",
                         style: TextStyle(
                           fontSize: 18,
@@ -291,7 +293,7 @@ class _OverviewPageState extends State<OverviewPage> {
                       ),
                       Text(
                         "₦${formatNumber(grandTotal)}",
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -301,19 +303,19 @@ class _OverviewPageState extends State<OverviewPage> {
                   ),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 12,
               ),
               Container(
-                margin: EdgeInsets.symmetric(
+                margin: const EdgeInsets.symmetric(
                     vertical: 8.0), // Add margin to the title
-                child: Text(
+                child: const Text(
                   'Payment Methods',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
 
-              Container(
+              SizedBox(
                 height: 100, // Set a fixed height for the scrollable area
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
@@ -323,10 +325,10 @@ class _OverviewPageState extends State<OverviewPage> {
                     return GestureDetector(
                       child: Card(
                         color: Colors.grey[300],
-                        margin: EdgeInsets.symmetric(horizontal: 8.0),
+                        margin: const EdgeInsets.symmetric(horizontal: 8.0),
                         elevation: 0,
                         child: Padding(
-                          padding: EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                               horizontal: 16.0, vertical: 0),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -334,12 +336,12 @@ class _OverviewPageState extends State<OverviewPage> {
                               Text(
                                 getPaymentTitleById(payment['id']) ??
                                     payment['id'],
-                                style: TextStyle(fontSize: 14),
+                                style: const TextStyle(fontSize: 14),
                               ),
-                              SizedBox(height: 8),
+                              const SizedBox(height: 8),
                               Text(
                                 '₦${formatNumber(payment['totalAmount'])}',
-                                style: TextStyle(
+                                style: const TextStyle(
                                     color: Colors.black,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 18),
@@ -353,14 +355,14 @@ class _OverviewPageState extends State<OverviewPage> {
                 ),
               ),
 
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
 
               // Transactions List
               Text(
                 'Items Sold: ${DateFormat('MMMM dd, yyyy').format(selectedDate)}',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               _buildTransactionList(),
             ],
           ),
@@ -381,8 +383,8 @@ class _OverviewPageState extends State<OverviewPage> {
     child: GestureDetector(
       onTap: () => _changeDate(filterDate), // Change date on tap
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 18, horizontal: 12), // Add padding
-        margin: EdgeInsets.all(4), // Margin for buttons
+        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12), // Add padding
+        margin: const EdgeInsets.all(4), // Margin for buttons
         decoration: BoxDecoration(
           color: isSelected ? primaryColor : Colors.white,
           border: Border.all(color: Colors.grey),
@@ -407,7 +409,7 @@ class _OverviewPageState extends State<OverviewPage> {
   /// **Build Transaction List**
   Widget _buildTransactionList() {
     if (transactions.isEmpty) {
-      return Center(
+      return const Center(
         child: Padding(
           padding: EdgeInsets.all(20),
           child: Text(
@@ -420,7 +422,7 @@ class _OverviewPageState extends State<OverviewPage> {
 
     return ListView.builder(
       shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
+      physics: const NeverScrollableScrollPhysics(),
       itemCount: transactions.length,
       itemBuilder: (context, index) {
         var item =
@@ -431,12 +433,12 @@ class _OverviewPageState extends State<OverviewPage> {
             border: Border.all(color: Colors.grey, width: 1),
             borderRadius: BorderRadius.circular(10),
           ),
-          margin: EdgeInsets.symmetric(vertical: 5),
+          margin: const EdgeInsets.symmetric(vertical: 5),
           child: Padding(
             // Wrap with Padding to remove internal padding
             padding: EdgeInsets.zero,
             child: ListTile(
-              contentPadding: EdgeInsets.symmetric(
+              contentPadding: const EdgeInsets.symmetric(
                   horizontal: 6,
                   vertical: 2), // Removes default ListTile padding
               dense: true, // Reduces tile height
@@ -450,25 +452,25 @@ class _OverviewPageState extends State<OverviewPage> {
                         height: 60,
                         fit: BoxFit.cover,
                       )
-                    : Icon(Icons.image_not_supported,
+                    : const Icon(Icons.image_not_supported,
                         size: 60, color: Colors.grey),
               ),
               title: Text(
                 item['title'],
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
               ),
               subtitle: Text("Total Sold: ${item['qty']} units",
-                  style: TextStyle(fontSize: 14)),
+                  style: const TextStyle(fontSize: 14)),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     "₦${formatNumber(item['amount'])}",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
-                  Icon(Icons.chevron_right),
+                  const Icon(Icons.chevron_right),
                 ],
               ),
               onTap: () {

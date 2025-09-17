@@ -9,8 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'constants.dart';
 import 'home_page.dart';
 import 'itemhistory.dart';
-import 'account.dart';
-import 'stock_management.dart';
+
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -26,6 +25,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   String business = '';
   TextEditingController searchController = TextEditingController();
   DateTime selectedDate = DateTime.now();
+  int editPrice = 0;
 
   @override
   void initState() {
@@ -88,8 +88,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Future<void> loadLocalData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? itemDataString = prefs.getString('itemData');
+    
     if (itemDataString != null) {
       setState(() {
+        editPrice = prefs.getInt('editPrice') ?? 0;
         localItemData = json.decode(itemDataString);
         filteredItems = List.from(localItemData);
         isFetching = false;
@@ -178,47 +180,48 @@ class _DashboardScreenState extends State<DashboardScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              "$business",
+              business,
               style: const TextStyle(
                   color: Colors.white, fontWeight: FontWeight.bold),
             ),
-            Row(
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => AccountPage()),
-                    );
-                  },
-                  child: const Icon(Icons.person_outline, color: Colors.white),
-                ),
-                //const SizedBox(width: 2),
-                IconButton(
-                  icon: const Icon(Icons.menu, color: Colors.white),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const StockManagementPage()),
-                    );
-                  },
-                ),
-              ],
-            ),
+            // Row(
+            //   children: [
+            //     GestureDetector(
+            //       onTap: () {
+            //         Navigator.push(
+            //           context,
+            //           MaterialPageRoute(builder: (context) => AccountPage()),
+            //         );
+            //       },
+            //       child: const Icon(Icons.person_outline, color: Colors.white),
+            //     ),
+            //     //const SizedBox(width: 2),
+            //     if(editPrice==0)
+            //     IconButton(
+            //       icon: const Icon(Icons.menu, color: Colors.white),
+            //       onPressed: () {
+            //         Navigator.push(
+            //           context,
+            //           MaterialPageRoute(
+            //               builder: (context) => const StockManagementPage()),
+            //         );
+            //       },
+            //     ),
+            //   ],
+            // ),
           ],
         ),
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: true,
         backgroundColor: primaryColor,
       ),
       body: Column(
         children: [
           // Search Bar
           Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color:
                   primaryColor, // Deep orange background for the external container
-              borderRadius: const BorderRadius.vertical(
+              borderRadius: BorderRadius.vertical(
                   bottom:
                       Radius.circular(16.0)), // Rounded corners at the bottom
             ),
@@ -259,7 +262,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => HomePage(selectedIndex: 1),
+                            builder: (context) => const HomePage(selectedIndex: 1),
                           ),
                         );
                       },
@@ -356,7 +359,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                   ),
                                                 );
                                               },
-                                              child: Container(
+                                              child: SizedBox(
                                                 width: 120,
                                                 child: Column(
                                                   mainAxisAlignment:

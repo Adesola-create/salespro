@@ -6,7 +6,7 @@ import 'constants.dart';
 import 'product_list.dart';
 
 class SetupAccountScreen extends StatefulWidget {
-  const SetupAccountScreen({Key? key}) : super(key: key);
+  const SetupAccountScreen({super.key});
 
   @override
   _SetupAccountScreenState createState() => _SetupAccountScreenState();
@@ -391,7 +391,7 @@ class _SetupAccountScreenState extends State<SetupAccountScreen> {
                     ElevatedButton(
                       onPressed: _previousStep,
                       style: buttonStyle.copyWith(
-                        backgroundColor: MaterialStateProperty.all(Colors.grey),
+                        backgroundColor: WidgetStateProperty.all(Colors.grey),
                       ),
                       child:
                           const Text('Back', style: TextStyle(color: Colors.white)),
@@ -401,7 +401,7 @@ class _SetupAccountScreenState extends State<SetupAccountScreen> {
                     onPressed: _currentStep < 4 ? _navigateToNextStep : _finishSetup,
                     style: buttonStyle.copyWith(
                       backgroundColor:
-                          MaterialStateProperty.all(primaryColor),
+                          WidgetStateProperty.all(primaryColor),
                     ),
                     child: Text(
                       _currentStep < 4 ? 'Next' : 'Finish',

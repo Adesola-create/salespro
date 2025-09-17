@@ -12,7 +12,7 @@ class ProductsPage extends StatefulWidget {
   final Function(List<String>)?
       onCategoriesFetched; // Add this line for callback
 
-  const ProductsPage({Key? key, this.onCategoriesFetched}) : super(key: key);
+  const ProductsPage({super.key, this.onCategoriesFetched});
 
   @override
   State<ProductsPage> createState() => _ProductsPageState();
@@ -105,7 +105,7 @@ class _ProductsPageState extends State<ProductsPage> {
         print('see updated category response hereeeeee: ${response.body}');
         // Show success
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Category added successfully!')),
+          const SnackBar(content: Text('Category added successfully!')),
         );
 
         // Add to local availableCategories
@@ -249,7 +249,7 @@ class _ProductsPageState extends State<ProductsPage> {
       if (response.statusCode == 200 || response.statusCode == 201) {
         print('see the response body here naaaaaaaaa: $productData');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Product added successfully!')),
+          const SnackBar(content: Text('Product added successfully!')),
         );
 
         // Save product locally
@@ -322,7 +322,7 @@ class _ProductsPageState extends State<ProductsPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
+                const Row(
                   children: [
                     BackButton(),
                     Text('Product List'),
@@ -337,15 +337,15 @@ class _ProductsPageState extends State<ProductsPage> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.deepOrange,
                         foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                        textStyle: TextStyle(fontSize: 14),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                        textStyle: const TextStyle(fontSize: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      child: Text('Category'),
+                      child: const Text('Category'),
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     ElevatedButton(
                       onPressed: () {
                         _showAddProductModal(context);
@@ -353,13 +353,13 @@ class _ProductsPageState extends State<ProductsPage> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.grey,
                         foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                        textStyle: TextStyle(fontSize: 14),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                        textStyle: const TextStyle(fontSize: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      child: Text('Product'),
+                      child: const Text('Product'),
                     ),
                   ],
                 ),
@@ -370,14 +370,14 @@ class _ProductsPageState extends State<ProductsPage> {
               child: TextField(
                 decoration: InputDecoration(
                   hintText: 'Search products...',
-                  prefixIcon: Icon(Icons.search),
+                  prefixIcon: const Icon(Icons.search),
                   filled: true,
                   fillColor: Colors.white,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide.none,
                   ),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 ),
                 onChanged: (value) {
                   setState(() {
@@ -403,14 +403,14 @@ class _ProductsPageState extends State<ProductsPage> {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: <Widget>[
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Expanded(
               child: isFetching
-                  ? Center(
+                  ? const Center(
                       child:
                           CircularProgressIndicator()) // Show loading indicator
                   : products.isEmpty
-                      ? Center(
+                      ? const Center(
                           child: Text(
                               'No products found.')) // Handle empty product list
                       : ListView.builder(
@@ -444,13 +444,13 @@ class _ProductsPageState extends State<ProductsPage> {
                                 children: [
                                   Text(
                                     product['category'] ?? 'N/A',
-                                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                                    style: const TextStyle(fontSize: 12, color: Colors.grey),
                                     overflow: TextOverflow.ellipsis,
                                     maxLines: 1,
                                   ),
                                   Text(
                                     "Price: ₦${formatNumber(product['price'])} | Qty: ${product['qty'] ?? 0}",
-                                    style: TextStyle(fontSize: 14),
+                                    style: const TextStyle(fontSize: 14),
                                     overflow: TextOverflow.ellipsis,
                                     maxLines: 1,
                                   ),
@@ -458,7 +458,7 @@ class _ProductsPageState extends State<ProductsPage> {
                               ),
                               
                               trailing: IconButton(
-                                icon: Icon(Icons.arrow_forward_ios),
+                                icon: const Icon(Icons.arrow_forward_ios),
                                 onPressed: () {
                                   _openProductProfile(product);
                                   FocusScope.of(context).unfocus();
@@ -497,7 +497,7 @@ class _ProductsPageState extends State<ProductsPage> {
           ),
           child: SingleChildScrollView(
             child: Container(
-              padding: EdgeInsets.all(20),
+              padding: const EdgeInsets.all(20),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -505,44 +505,44 @@ class _ProductsPageState extends State<ProductsPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
+                      const Text(
                         'Add Product Category',
                         style: TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                       IconButton(
-                        icon: Icon(Icons.close),
+                        icon: const Icon(Icons.close),
                         onPressed: () {
                           Navigator.of(context).pop();
                         },
                       ),
                     ],
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   TextFormField(
                     controller: categoryTitleController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Title',
                       border: OutlineInputBorder(),
                     ),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   TextFormField(
                     controller: categoryDescriptionController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Description',
                       border: OutlineInputBorder(),
                     ),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   TextFormField(
                     controller: categoryOtherInfoController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Other Information',
                       border: OutlineInputBorder(),
                     ),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () {
                       _addCategory(
@@ -555,14 +555,14 @@ class _ProductsPageState extends State<ProductsPage> {
                       backgroundColor: Colors.deepOrange,
                       foregroundColor: Colors.white,
                       padding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                      textStyle: TextStyle(fontSize: 16),
+                          const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      textStyle: const TextStyle(fontSize: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      minimumSize: Size(double.infinity, 50),
+                      minimumSize: const Size(double.infinity, 50),
                     ),
-                    child: Text('Add Category'),
+                    child: const Text('Add Category'),
                   ),
                 ],
               ),
@@ -585,7 +585,7 @@ class _ProductsPageState extends State<ProductsPage> {
           ),
           child: SingleChildScrollView(
             child: Container(
-              padding: EdgeInsets.all(20),
+              padding: const EdgeInsets.all(20),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -593,29 +593,29 @@ class _ProductsPageState extends State<ProductsPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
+                      const Text(
                         'Add Product',
                         style: TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                       IconButton(
-                        icon: Icon(Icons.close),
+                        icon: const Icon(Icons.close),
                         onPressed: () {
                           Navigator.of(context).pop();
                         },
                       ),
                     ],
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   availableCategories.isEmpty
-                      ? Text("No categories available")
+                      ? const Text("No categories available")
                       : DropdownButtonFormField<String>(
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Category',
                             border: OutlineInputBorder(),
                           ),
                           value: selectedCategory,
-                          hint: Text('Select category'),
+                          hint: const Text('Select category'),
                           items: availableCategories.map((String category) {
                             return DropdownMenuItem<String>(
                               value: category,
@@ -629,52 +629,52 @@ class _ProductsPageState extends State<ProductsPage> {
                             });
                           },
                         ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   TextFormField(
                     controller: productTitleController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Title',
                       border: OutlineInputBorder(),
                     ),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   TextFormField(
                     controller: productDescriptionController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Description',
                       border: OutlineInputBorder(),
                     ),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   TextFormField(
                     controller: productOtherInfoController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Other Information',
                       border: OutlineInputBorder(),
                     ),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   TextFormField(
                     controller: sellingPriceController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Selling Price',
                       border: OutlineInputBorder(),
                     ),
                     keyboardType:
-                        TextInputType.numberWithOptions(decimal: true),
+                        const TextInputType.numberWithOptions(decimal: true),
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$'))
                     ],
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   TextFormField(
                     controller: barcodeController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Barcode',
                       border: OutlineInputBorder(),
                     ),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () {
                       _addProduct(); // Call the add product logic
@@ -683,14 +683,14 @@ class _ProductsPageState extends State<ProductsPage> {
                       backgroundColor: Colors.grey,
                       foregroundColor: Colors.white,
                       padding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                      textStyle: TextStyle(fontSize: 16),
+                          const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      textStyle: const TextStyle(fontSize: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      minimumSize: Size(double.infinity, 50), // Make button full width
+                      minimumSize: const Size(double.infinity, 50), // Make button full width
                     ),
-                    child: Center(child: Text('Add Product')), // Center the text
+                    child: const Center(child: Text('Add Product')), // Center the text
                   ),
                 ],
               ),

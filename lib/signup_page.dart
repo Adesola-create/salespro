@@ -9,7 +9,7 @@ import 'welcome_screen.dart';
 
 class PhoneNumberInput extends StatefulWidget {
   final TextEditingController controller;
-  const PhoneNumberInput({Key? key, required this.controller}) : super(key: key);
+  const PhoneNumberInput({super.key, required this.controller});
 
   @override
   _PhoneNumberInputState createState() => _PhoneNumberInputState();
@@ -40,7 +40,7 @@ class _PhoneNumberInputState extends State<PhoneNumberInput> {
 }
 
 class SignupScreen extends StatefulWidget {
-  const SignupScreen({Key? key}) : super(key: key);
+  const SignupScreen({super.key});
 
   @override
   _SignupScreenState createState() => _SignupScreenState();

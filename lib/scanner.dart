@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 import 'package:audioplayers/audioplayers.dart';
 
 class BarcodeScannerPage extends StatefulWidget {
+  const BarcodeScannerPage({super.key});
+
   @override
   _BarcodeScannerPageState createState() => _BarcodeScannerPageState();
 }
@@ -51,7 +53,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
 
     if (product.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Product not found!'),
           duration: Duration(seconds: 2),
         ),
@@ -79,7 +81,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('${product['title']} added to cart!'),
-        duration: Duration(seconds: 2),
+        duration: const Duration(seconds: 2),
       ),
     );
   }
@@ -105,22 +107,22 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 'Update Quantity',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 5), // Small space between title and subtitle
+              const SizedBox(height: 5), // Small space between title and subtitle
               Text(
                 '${cart[index]['title']}',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
+                style: const TextStyle(fontSize: 16, color: Colors.grey),
               ),
             ],
           ),
           content: TextField(
             controller: qtyController,
             keyboardType: TextInputType.number,
-            style: TextStyle(fontSize: 28), // Increased input text size
-            decoration: InputDecoration(
+            style: const TextStyle(fontSize: 28), // Increased input text size
+            decoration: const InputDecoration(
               hintText: 'Enter quantity',
               hintStyle: TextStyle(fontSize: 20), // Increased hint size
             ),
@@ -129,7 +131,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
@@ -142,7 +144,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
                 });
                 Navigator.pop(context);
               },
-              child: Text('Update'),
+              child: const Text('Update'),
             ),
           ],
         );
@@ -157,20 +159,20 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
     //TextEditingController qtyController = TextEditingController();
     return Scaffold(
       appBar: AppBar(
-        title: Text('Barcode/QR Scanner'),
+        title: const Text('Barcode/QR Scanner'),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pop(context, true); // Return `true` to indicate refresh
           },
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.flash_on),
+            icon: const Icon(Icons.flash_on),
             onPressed: () => _controller.toggleTorch(),
           ),
           IconButton(
-            icon: Icon(Icons.camera_alt),
+            icon: const Icon(Icons.camera_alt),
             onPressed: () => _controller.switchCamera(),
           ),
         ],
@@ -202,7 +204,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
           // Cart section
           Expanded(
             child: Container(
-              padding: EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16.0),
               color: Colors.white, // Background color
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -211,19 +213,19 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
+                      const Text(
                         'Cart',
                         style: TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                       Text(
                         'Total: ₦${formatNumber(cartTotal)}',
-                        style: TextStyle(
+                        style: const TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
 
                   // Scrollable item list
                   Expanded(
@@ -237,8 +239,8 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
                             onTap: () => showQuantityInputDialog(
                                 context, index), // Trigger dialog on tap
                             child: Container(
-                              margin: EdgeInsets.symmetric(vertical: 3.0),
-                              padding: EdgeInsets.symmetric(
+                              margin: const EdgeInsets.symmetric(vertical: 3.0),
+                              padding: const EdgeInsets.symmetric(
                                   horizontal: 8.0, vertical: 4),
                               decoration: BoxDecoration(
                                 color: Colors.white,
@@ -255,7 +257,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
                                     children: [
                                       Text(
                                         item['title'],
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                             fontWeight: FontWeight.bold),
                                       ),
                                       Row(

@@ -14,7 +14,7 @@ import 'package:blue_thermal_printer/blue_thermal_printer.dart';
 class ReceiptScreen extends StatefulWidget {
   final Map<String, dynamic> salesLog;
 
-  ReceiptScreen({required this.salesLog});
+  const ReceiptScreen({super.key, required this.salesLog});
 
   @override
   _ReceiptScreenState createState() => _ReceiptScreenState();
@@ -202,10 +202,10 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Receipt'),
+        title: const Text('Receipt'),
         actions: [
           IconButton(
-            icon: Icon(Icons.settings),
+            icon: const Icon(Icons.settings),
             onPressed: () {
               setState(() {
                 _isVisible = false; // Toggle visibility
@@ -220,10 +220,10 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
               backgroundColor: Colors.grey[300], // Grey background
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
-                side: BorderSide(color: Colors.grey), // Grey border
+                side: const BorderSide(color: Colors.grey), // Grey border
               ),
             ),
-            child: Row(
+            child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(Icons.print, color: Colors.black), // Print Icon
@@ -235,7 +235,7 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -277,7 +277,7 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
                   Container(
                     // Removed the border property
                     child: DropdownButton<BluetoothDevice>(
-                      hint: Text("Select Printer"),
+                      hint: const Text("Select Printer"),
                       value: _selectedDevice,
                       onChanged: (device) {
                         setState(() {
@@ -288,7 +288,7 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
                         return DropdownMenuItem(
                           value: device,
                           child: Padding(
-                            padding: EdgeInsets.only(
+                            padding: const EdgeInsets.only(
                                 left: 16.0,
                                 top: 4.0,
                                 bottom: 4.0), // Reduced vertical padding
@@ -332,36 +332,36 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
             //     ),
             Center(
               child: Text(business,
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Center(
-              child: Text('($services)', style: TextStyle(fontSize: 16)),
-            ),
-            Center(
-              child: Text(address, style: TextStyle(fontSize: 16)),
+              child: Text('($services)', style: const TextStyle(fontSize: 16)),
             ),
             Center(
-              child: Text(businessphone, style: TextStyle(fontSize: 16)),
+              child: Text(address, style: const TextStyle(fontSize: 16)),
             ),
-            SizedBox(height: 20),
+            Center(
+              child: Text(businessphone, style: const TextStyle(fontSize: 16)),
+            ),
+            const SizedBox(height: 20),
             Text('Customer: ${widget.salesLog['name']}',
-                style: TextStyle(fontSize: 16)),
+                style: const TextStyle(fontSize: 16)),
             Text(
               'Date: ${DateTime.parse(widget.salesLog['timestamp']).toLocal().toString().substring(0, 16)}',
-              style: TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 16),
             ),
             Text('salesID: ${widget.salesLog['salesID']}',
-                style: TextStyle(fontSize: 16)),
+                style: const TextStyle(fontSize: 16)),
             Text(
                 'Payment Method: ${getPaymentTitleById(widget.salesLog['payMethod'])}',
-                style: TextStyle(fontSize: 16)),
+                style: const TextStyle(fontSize: 16)),
             Text('Served by: ${widget.salesLog['servedBy']}',
-                style: TextStyle(fontSize: 16)),
-            SizedBox(height: 20),
+                style: const TextStyle(fontSize: 16)),
+            const SizedBox(height: 20),
             Column(
               children: [
-                ListTile(
+                const ListTile(
                   contentPadding: EdgeInsets.zero, // Remove padding
                   dense: true, // Reduce tile height
                   leading: Text(
@@ -390,12 +390,12 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
                     ],
                   ),
                 ),
-                Divider(thickness: 1, height: 0), // No extra space between rows
+                const Divider(thickness: 1, height: 0), // No extra space between rows
                 ListView.separated(
                   itemCount: cart.length,
                   shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  separatorBuilder: (context, index) => Divider(
+                  physics: const NeverScrollableScrollPhysics(),
+                  separatorBuilder: (context, index) => const Divider(
                       thickness: 1, height: 0), // No space between items
                   itemBuilder: (context, index) {
                     var item = cart[index];
@@ -403,36 +403,36 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
                       contentPadding: EdgeInsets.zero, // Remove padding
                       dense: true, // Reduce height
                       leading: Text('${item['qty']}',
-                          style: TextStyle(fontSize: 16)),
+                          style: const TextStyle(fontSize: 16)),
                       title:
-                          Text(item['title'], style: TextStyle(fontSize: 16)),
+                          Text(item['title'], style: const TextStyle(fontSize: 16)),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min, // No extra spacing
                         children: [
                           Text('₦${formatNumber(item['price'])}',
-                              style: TextStyle(fontSize: 16)),
-                          SizedBox(width: 16),
+                              style: const TextStyle(fontSize: 16)),
+                          const SizedBox(width: 16),
                           Text('₦${formatNumber(item['amount'])}',
-                              style: TextStyle(fontSize: 16)),
+                              style: const TextStyle(fontSize: 16)),
                         ],
                       ),
                     );
                   },
                 ),
-                Divider(thickness: 1, height: 0), // No extra space
+                const Divider(thickness: 1, height: 0), // No extra space
                 Padding(
                   padding: EdgeInsets.zero, // Remove padding
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
+                      const Text(
                         'Grand Total:',
                         style: TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                       Text(
                         '₦${formatNumber(total)}',
-                        style: TextStyle(
+                        style: const TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                     ],
@@ -440,11 +440,11 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
                 ),
               ],
             ),
-            Center(
+            const Center(
               child: Text('Thank you for your patronage!',
                   style: TextStyle(fontSize: 16)),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -489,8 +489,8 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
       String title = item['title'].length > 12
           ? item['title'].substring(0, 12)
           : item['title'];
-      String price = '${formatNumber(item['price'])}';
-      String amount = '${formatNumber(item['amount'])}';
+      String price = formatNumber(item['price']);
+      String amount = formatNumber(item['amount']);
 
       bluetooth.printLeftRight("$qty  $title", "$price  $amount", 0);
     }

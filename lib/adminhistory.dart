@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'adminhistory.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
@@ -7,32 +6,39 @@ import 'constants.dart';
 import 'receipt.dart';
 import 'package:http/http.dart' as http;
 
-class HistoryPage extends StatefulWidget {
-  const HistoryPage({super.key});
+class AdminHistory extends StatefulWidget {
+  const AdminHistory({super.key});
 
   @override
-  _HistoryPageState createState() => _HistoryPageState();
+  _AdminHistoryState createState() => _AdminHistoryState();
 }
 
-class _HistoryPageState extends State<HistoryPage> {
+class _AdminHistoryState extends State<AdminHistory> {
   List<Map<String, dynamic>> _transactionLogs = [];
   bool _isLoading = true;
   DateTime selectedDate = DateTime.now(); // Default to today
+  DateTime endDate = DateTime.now(); // Default to today
   Set<String> transactionDates = {}; // Set to track transaction dates
+  bool isFetching = false;
+  int historyLength = 10;
 
   @override
   void initState() {
     super.initState();
     _loadTransactionLogs();
-    sendPendingTransactions();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToEnd(); // Scroll to the end after the UI builds
     });
   }
 
+  int computeDaysBetween(DateTime start, DateTime end) {
+    return end.difference(start).inDays;
+  }
+
+//DateTime convertedDate = DateTime.parse('2025-06-25');
   Future<void> _loadTransactionLogs() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> logs = prefs.getStringList('transaction_logs') ?? [];
+    List<String> logs = prefs.getStringList('admintransaction_logs') ?? [];
 
     List<Map<String, dynamic>> loadedLogs = logs.map((log) {
       return Map<String, dynamic>.from(jsonDecode(log));
@@ -66,6 +72,52 @@ class _HistoryPageState extends State<HistoryPage> {
   //     _loadTransactionLogs();
   //   });
   // }
+
+  Future<void> fetchHistory(DateTime startDate, DateTime endDates) async {
+    setState(() {
+      isFetching = true;
+    });
+    print('$startDate $endDates');
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    const String url = 'https://salespro.livepetal.com/v1/getadminhistory';
+    String? token = prefs.getString('apiKey');
+
+    try {
+      Map<String, String> headers = {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      };
+
+      final response = await http.post(
+        Uri.parse(url),
+        headers: headers,
+        body: jsonEncode({'start': '$startDate', 'end': '$endDates'}),
+      );
+
+      if (response.statusCode == 200) {
+        print('Response status: ${response.statusCode}');
+        print('Response body..................: ${response.body}');
+        final Map<String, dynamic> responseData = json.decode(response.body);
+        List<dynamic> fetchedData = responseData['data'] ?? [];
+        //prefs.setStringList('admintransaction_logs', jsonEncode(fetchedData).toList());
+        prefs.setStringList('admintransaction_logs',
+            fetchedData.map((log) => jsonEncode(log)).toList());
+
+//convertedDate = DateTime.parse('2025-06-25');
+        setState(() {
+          endDate = endDates;
+          historyLength = computeDaysBetween(startDate, endDates) + 1;
+          isFetching = false;
+        });
+        _loadTransactionLogs();
+        //_filterItems();
+      } else {
+        debugPrint('Error: ${response.statusCode} ${response.body}');
+      }
+    } catch (e) {
+      debugPrint('Error fetching data: $e');
+    }
+  }
 
   void _changeDate(DateTime newDate) {
     setState(() {
@@ -164,21 +216,18 @@ class _HistoryPageState extends State<HistoryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Transaction History',
+        title: const Text('Admin Agents History',
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-        automaticallyImplyLeading: false,
-        actions: [ 
-        //  if(editPrice==0)
-                IconButton(
-                  icon: const Icon(Icons.menu, color: Colors.grey, size: 28,),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => AdminHistory()),
-                    );
-                  },
-                ),],
+        // automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.history, color: Colors.grey),
+            onPressed: () {
+              // fetchHistory();
+              showDateRangeBottomSheet();
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -188,9 +237,9 @@ class _HistoryPageState extends State<HistoryPage> {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.all(10),
             child: Row(
-              children: List.generate(10, (index) {
-                DateTime date = DateTime.now()
-                    .subtract(Duration(days: 9 - index)); // Ascending order
+              children: List.generate(historyLength, (index) {
+                DateTime date = endDate.subtract(Duration(
+                    days: historyLength - 1 - index)); // Ascending order
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: _buildFilterButton(date),
@@ -236,13 +285,9 @@ class _HistoryPageState extends State<HistoryPage> {
                                         .substring(0, 16),
                                   ),
                                   const SizedBox(width: 8),
-                                  Icon(
-                                    log['sent'] == true
-                                        ? Icons.check_circle
-                                        : Icons.cancel,
-                                    color: log['sent'] == true
-                                        ? Colors.green
-                                        : Colors.grey,
+                                  const Icon(
+                                    Icons.check_circle,
+                                    color: Colors.green,
                                     size: 18,
                                   ),
                                 ],
@@ -267,7 +312,7 @@ class _HistoryPageState extends State<HistoryPage> {
                                             fontSize: 16),
                                       ),
                                       Text(
-                                          '${log['cart'].length} Items', // Items count
+                                          '${log['cart'] == null ? 0 : log['cart'].length} Items', // Items count
                                           style: const TextStyle(fontSize: 12)),
                                     ],
                                   ),
@@ -280,6 +325,17 @@ class _HistoryPageState extends State<HistoryPage> {
                                 ],
                               ),
                               onTap: () {
+                                final cart = log['cart'] ?? [];
+
+                                if (cart.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text(
+                                            'No items in the cart to view receipt')),
+                                  );
+                                  return;
+                                }
+
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -298,44 +354,159 @@ class _HistoryPageState extends State<HistoryPage> {
     );
   }
 
-  void sendPendingTransactions() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> logs = prefs.getStringList('transaction_logs') ?? [];
-
-    List<Map<String, dynamic>> allLogs =
-        logs.map((log) => jsonDecode(log) as Map<String, dynamic>).toList();
-    for (var transaction in allLogs) {
-      if (transaction['sent'] == false) {
-        try {
-          const String url = 'https://salespro.livepetal.com/v1/addhistory';
-          String token = prefs.getString('apiKey') ?? '';
-
-          Map<String, String> headers = {
-            'Authorization': 'Bearer $token',
-            'Content-Type': 'application/json',
-          };
-
-          final response = await http.post(
-            Uri.parse(url),
-            headers: headers,
-            body: jsonEncode(transaction),
-          );
-
-          if (response.statusCode == 200) {
-            transaction['sent'] = true;
-            // Save entire logs
-            prefs.setStringList('transaction_logs',
-                allLogs.map((log) => jsonEncode(log)).toList());
-          }
-        } catch (e) {
-          print('Error sending transaction: $e');
-        }
-      }
-    }
-  }
-
   String formatNumber(num amount) {
     final formatter = NumberFormat('#,###', 'en_US');
     return formatter.format(amount);
+  }
+
+  void showDateRangeBottomSheet() {
+    DateTime? startDate;
+    DateTime? endDate;
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      isScrollControlled: true,
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            top: 20,
+            left: 20,
+            right: 20,
+          ),
+          child: StatefulBuilder(
+            builder: (context, setState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Select Date Range',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Start Date Field
+                  GestureDetector(
+                    onTap: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: startDate ?? DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2100),
+                      );
+                      if (picked != null) {
+                        setState(() {
+                          startDate = picked;
+                        });
+                      }
+                    },
+                    child: AbsorbPointer(
+                      child: TextFormField(
+                        readOnly: true,
+                        decoration: InputDecoration(
+                          labelText: 'Start Date',
+                          hintText: 'Choose a start date',
+                          suffixIcon: const Icon(Icons.calendar_today),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        controller: TextEditingController(
+                          text: startDate != null
+                              ? startDate!.toLocal().toString().substring(0, 10)
+                              : '',
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // End Date Field
+                  GestureDetector(
+                    onTap: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: endDate ?? DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime
+                            .now(), // This disables selection of future dates,
+                      );
+                      if (picked != null) {
+                        setState(() {
+                          endDate = picked;
+                        });
+                      }
+                    },
+                    child: AbsorbPointer(
+                      child: TextFormField(
+                        readOnly: true,
+                        decoration: InputDecoration(
+                          labelText: 'End Date',
+                          hintText: 'Choose an end date',
+                          suffixIcon: const Icon(Icons.calendar_today),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        controller: TextEditingController(
+                          text: endDate != null
+                              ? endDate!.toLocal().toString().substring(0, 10)
+                              : '',
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Submit Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (startDate != null && endDate != null) {
+                          if (startDate!.isAfter(endDate!)) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text(
+                                      'Start date cannot be after end date')),
+                            );
+                            return;
+                          }
+
+                          Navigator.pop(context); // Close modal
+                          fetchHistory(
+                              startDate!, endDate!); // Proceed with valid range
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text(
+                                    'Please select both start and end dates')),
+                          );
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        'Submit',
+                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+                ],
+              );
+            },
+          ),
+        );
+      },
+    );
   }
 }

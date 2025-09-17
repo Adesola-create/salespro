@@ -7,6 +7,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 
 class OrderPage extends StatefulWidget {
+  const OrderPage({super.key});
+
   @override
   _OrderPageState createState() => _OrderPageState();
 }
@@ -54,7 +56,7 @@ class _OrderPageState extends State<OrderPage>
   String dayWithSuffix = '${dateTime.day}${getDaySuffix(dateTime.day)}';
   
   // Combine formatted parts
-  return '${formattedDate.replaceFirst('${dateTime.day}', dayWithSuffix)}';
+  return formattedDate.replaceFirst('${dateTime.day}', dayWithSuffix);
 }
 
 // Function to determine the suffix
@@ -196,7 +198,7 @@ void _sortOrdersByDate(List<Map<String, dynamic>>? ordersList) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,
-        title: Text(
+        title: const Text(
           'Customer Orders',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
@@ -205,7 +207,7 @@ void _sortOrdersByDate(List<Map<String, dynamic>>? ordersList) {
           controller: _tabController,
           labelColor: Colors.white, // Selected tab color
           unselectedLabelColor: Colors.white54, // Unselected tab color
-          tabs: [
+          tabs: const [
             Tab(
               child: Text(
                 'Upcoming',
@@ -237,7 +239,7 @@ void _sortOrdersByDate(List<Map<String, dynamic>>? ordersList) {
         ),
       ),
       body: isLoading
-          ? Center(
+          ? const Center(
               child:
                   CircularProgressIndicator(), // Loader displayed while fetching
             )
@@ -254,7 +256,7 @@ void _sortOrdersByDate(List<Map<String, dynamic>>? ordersList) {
 
   Widget _buildOrderList(List<Map<String, dynamic>>? orderList) {
     if (orderList == null || orderList.isEmpty) {
-      return Center(child: Text('No orders available.'));
+      return const Center(child: Text('No orders available.'));
     }
 
     return Padding(
@@ -266,9 +268,9 @@ void _sortOrdersByDate(List<Map<String, dynamic>>? ordersList) {
 return Card(
   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
   elevation: 0,
-  margin: EdgeInsets.symmetric(vertical: 5),
+  margin: const EdgeInsets.symmetric(vertical: 5),
   child: ListTile(
-    leading: CircleAvatar(
+    leading: const CircleAvatar(
       backgroundColor: Colors.grey,
       child: Icon(Icons.person, color: Colors.white),
     ),
@@ -278,13 +280,13 @@ return Card(
         Expanded(
           child: Text(
             order['customer_name'] ?? '',
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: const TextStyle(fontWeight: FontWeight.bold),
             overflow: TextOverflow.ellipsis, // Prevent overflow if the name is too long
           ),
         ),
         Text(
           "₦${formatNumber(num.parse(order['total'] ?? '0'))}",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
         ),
       ],
     ),
@@ -300,11 +302,11 @@ return Card(
         ),
         Text(
           formatSalesDate(order['salesdate'] ?? ''),
-          style: TextStyle(fontSize: 12),
+          style: const TextStyle(fontSize: 12),
         ),
       ],
     ),
-    trailing: Row(
+    trailing: const Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(

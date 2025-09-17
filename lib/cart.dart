@@ -12,6 +12,8 @@ import 'package:http/http.dart' as http;
 import 'scanner.dart';
 
 class POSHomePage extends StatefulWidget {
+  const POSHomePage({super.key});
+
   @override
   _POSHomePageState createState() => _POSHomePageState();
 }
@@ -119,7 +121,7 @@ class _POSHomePageState extends State<POSHomePage> {
   }
 
   Future<void> _fetchCustomer() async {
-    print('fetching new customers.');
+    //print('fetching new customers.');
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? storedCustomers = prefs.getString('myCustomers');
     List<Map<String, dynamic>> customers = storedCustomers != null
@@ -129,7 +131,7 @@ class _POSHomePageState extends State<POSHomePage> {
     // Ensure no contact has 'sent' status of false
     if (customers.any((customer) => customer['sent'] == 'false')) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Not Synchronized'),
           duration: Duration(seconds: 2),
         ),
@@ -160,7 +162,7 @@ class _POSHomePageState extends State<POSHomePage> {
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('Contacts Synchronized'),
             duration: Duration(seconds: 2),
           ),
@@ -268,7 +270,7 @@ class _POSHomePageState extends State<POSHomePage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('${product['title']} added to cart!'),
-        duration: Duration(seconds: 2),
+        duration: const Duration(seconds: 2),
       ),
     );
   }
@@ -283,7 +285,7 @@ class _POSHomePageState extends State<POSHomePage> {
   void checkout() async {
     if (cart.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Your cart is empty. Please add items to checkout.'),
           duration: Duration(seconds: 2),
         ),
@@ -295,7 +297,7 @@ class _POSHomePageState extends State<POSHomePage> {
     if (selectedPaymentMethod == 'Select Method') {
       _showPaymentOptions(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Please select payment method'),
           duration: Duration(seconds: 2),
         ),
@@ -306,7 +308,7 @@ class _POSHomePageState extends State<POSHomePage> {
     if (name.isEmpty) {
       _showAddCustomerModal(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Please add customer'),
           duration: Duration(seconds: 2),
         ),
@@ -376,22 +378,22 @@ class _POSHomePageState extends State<POSHomePage> {
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 'Update Quantity',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 5), // Small space between title and subtitle
+              const SizedBox(height: 5), // Small space between title and subtitle
               Text(
                 '${cart[index]['title']}',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
+                style: const TextStyle(fontSize: 16, color: Colors.grey),
               ),
             ],
           ),
           content: TextField(
             controller: qtyController,
             keyboardType: TextInputType.number,
-            style: TextStyle(fontSize: 28), // Increased input text size
-            decoration: InputDecoration(
+            style: const TextStyle(fontSize: 28), // Increased input text size
+            decoration: const InputDecoration(
               hintText: 'Enter quantity',
               hintStyle: TextStyle(fontSize: 20), // Increased hint size
             ),
@@ -400,7 +402,7 @@ class _POSHomePageState extends State<POSHomePage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
@@ -413,7 +415,7 @@ class _POSHomePageState extends State<POSHomePage> {
                 });
                 Navigator.pop(context);
               },
-              child: Text('Update'),
+              child: const Text('Update'),
             ),
           ],
         );
@@ -432,22 +434,22 @@ class _POSHomePageState extends State<POSHomePage> {
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 'Update Price',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 5), // Small space between title and subtitle
+              const SizedBox(height: 5), // Small space between title and subtitle
               Text(
                 '${cart[index]['title']}',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
+                style: const TextStyle(fontSize: 16, color: Colors.grey),
               ),
             ],
           ),
           content: TextField(
             controller: priceController,
             keyboardType: TextInputType.number,
-            style: TextStyle(fontSize: 28), // Increased input text size
-            decoration: InputDecoration(
+            style: const TextStyle(fontSize: 28), // Increased input text size
+            decoration: const InputDecoration(
               hintText: 'Enter price',
               hintStyle: TextStyle(fontSize: 20), // Increased hint size
             ),
@@ -456,7 +458,7 @@ class _POSHomePageState extends State<POSHomePage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
@@ -469,7 +471,7 @@ class _POSHomePageState extends State<POSHomePage> {
                 });
                 Navigator.pop(context);
               },
-              child: Text('Update'),
+              child: const Text('Update'),
             ),
           ],
         );
@@ -482,7 +484,7 @@ class _POSHomePageState extends State<POSHomePage> {
     products.sort((a, b) => a['title'].compareTo(b['title']));
     return Scaffold(
       appBar: AppBar(
-        title: Text('POS',
+        title: const Text('POS',
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
         automaticallyImplyLeading: false,
         actions: [
@@ -493,7 +495,7 @@ class _POSHomePageState extends State<POSHomePage> {
               border: Border.all(color: Colors.grey, width: 1), // Grey border
             ),
             child: IconButton(
-              icon: Icon(
+              icon: const Icon(
                 Icons.calculate_outlined,
                 color: Colors.black,
                 size: 32,
@@ -501,12 +503,12 @@ class _POSHomePageState extends State<POSHomePage> {
               onPressed: () async {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => CalculatorScreen()),
+                  MaterialPageRoute(builder: (context) => const CalculatorScreen()),
                 );
               },
             ),
           ),
-          SizedBox(
+          const SizedBox(
             width: 4,
           ),
           Container(
@@ -516,7 +518,7 @@ class _POSHomePageState extends State<POSHomePage> {
               border: Border.all(color: Colors.grey, width: 1), // Grey border
             ),
             child: IconButton(
-              icon: Icon(
+              icon: const Icon(
                 Icons.qr_code,
                 color: Colors.black,
                 size: 32,
@@ -524,7 +526,7 @@ class _POSHomePageState extends State<POSHomePage> {
               onPressed: () => _navigateToScanner(),
             ),
           ),
-          SizedBox(
+          const SizedBox(
             width: 4,
           ),
           Container(
@@ -534,7 +536,7 @@ class _POSHomePageState extends State<POSHomePage> {
               border: Border.all(color: Colors.grey, width: 1), // Grey border
             ),
             child: IconButton(
-              icon: Icon(
+              icon: const Icon(
                 Icons.add,
                 color: Colors.black,
                 size: 32,
@@ -548,7 +550,7 @@ class _POSHomePageState extends State<POSHomePage> {
               },
             ),
           ),
-          SizedBox(
+          const SizedBox(
             width: 4,
           ),
           Center(
@@ -557,30 +559,30 @@ class _POSHomePageState extends State<POSHomePage> {
                 border: Border.all(color: Colors.grey), // Grey outline
                 borderRadius: BorderRadius.circular(14), // Border radius
               ),
-              padding: EdgeInsets.all(8), // Padding around the textF
+              padding: const EdgeInsets.all(8), // Padding around the textF
               child: Text(
                 '₦${formatNumber(cart.fold<num>(0, (sum, item) => sum + (item['amount'] ?? 0)))}',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
             ),
           ),
-          SizedBox(
+          const SizedBox(
             width: 12,
           )
         ],
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8.0),
           child: Column(
             crossAxisAlignment:
                 CrossAxisAlignment.start, // Align children to the left
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              SizedBox(
+              const SizedBox(
                 height: 12,
               ),
-              Container(
+              SizedBox(
                 height: 70, // Set height for the scrollable area
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal, // Horizontal scrolling
@@ -599,7 +601,7 @@ class _POSHomePageState extends State<POSHomePage> {
                       },
                       child: Container(
                         width: 140, // Width of each button
-                        margin: EdgeInsets.symmetric(
+                        margin: const EdgeInsets.symmetric(
                             horizontal: 8.0), // Spacing between items
                         decoration: BoxDecoration(
                           border:
@@ -649,7 +651,7 @@ class _POSHomePageState extends State<POSHomePage> {
                                       ),
                                     ),
                                     Container(
-                                      padding: EdgeInsets.symmetric(
+                                      padding: const EdgeInsets.symmetric(
                                           horizontal: 8.0, vertical: 4.0),
                                       decoration: BoxDecoration(
                                         color: (product['qty'] ?? 0) > 0
@@ -660,7 +662,7 @@ class _POSHomePageState extends State<POSHomePage> {
                                       ),
                                       child: Text(
                                         '${product['qty'] ?? '0'}',
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -677,18 +679,18 @@ class _POSHomePageState extends State<POSHomePage> {
                   },
                 ),
               ),
-              SizedBox(height: 10),
-              Text('Sales Order',
+              const SizedBox(height: 10),
+              const Text('Sales Order',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
               ListView.builder(
                 itemCount: cart.length,
                 shrinkWrap: true, // Important for using ListView in a Column
-                physics: NeverScrollableScrollPhysics(), // Disable scrolling
+                physics: const NeverScrollableScrollPhysics(), // Disable scrolling
                 itemBuilder: (context, index) {
                   var item = cart[index];
                   return Container(
-                    margin: EdgeInsets.symmetric(vertical: 4.0),
+                    margin: const EdgeInsets.symmetric(vertical: 4.0),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.grey, width: 1),
                       borderRadius: BorderRadius.circular(10),
@@ -698,7 +700,7 @@ class _POSHomePageState extends State<POSHomePage> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10)),
                       child: Padding(
-                        padding: EdgeInsets.all(0),
+                        padding: const EdgeInsets.all(0),
                         child: Row(
                           children: [
                             ClipRRect(
@@ -726,10 +728,10 @@ class _POSHomePageState extends State<POSHomePage> {
                                         );
                                       },
                                     )
-                                  : Icon(Icons.image_not_supported,
+                                  : const Icon(Icons.image_not_supported,
                                       size: 90, color: Colors.grey),
                             ),
-                            SizedBox(width: 10),
+                            const SizedBox(width: 10),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -746,7 +748,7 @@ class _POSHomePageState extends State<POSHomePage> {
                                               : '',
                                           child: Text(
                                             '${item['title']}\nUnit Price: ₦${formatNumber(item['price'])}',
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.bold),
                                             overflow: TextOverflow.ellipsis,
@@ -754,7 +756,7 @@ class _POSHomePageState extends State<POSHomePage> {
                                         ),
                                       ),
                                       IconButton(
-                                        icon: Icon(Icons.delete_outline,
+                                        icon: const Icon(Icons.delete_outline,
                                             color: Colors.grey),
                                         onPressed: () => removeFromCart(index),
                                       ),
@@ -767,7 +769,7 @@ class _POSHomePageState extends State<POSHomePage> {
                                       Row(
                                         children: [
                                           IconButton(
-                                            icon: Icon(
+                                            icon: const Icon(
                                                 Icons.remove_circle_outline,
                                                 size: 28),
                                             onPressed: () =>
@@ -779,13 +781,13 @@ class _POSHomePageState extends State<POSHomePage> {
                                                     context, index),
                                             child: Text(
                                               '${item['qty']}',
-                                              style: TextStyle(
+                                              style: const TextStyle(
                                                   fontSize: 20,
                                                   fontWeight: FontWeight.bold),
                                             ),
                                           ),
                                           IconButton(
-                                            icon: Icon(Icons.add_circle_outline,
+                                            icon: const Icon(Icons.add_circle_outline,
                                                 size: 28),
                                             onPressed: () =>
                                                 updateQuantity(index, 1),
@@ -794,7 +796,7 @@ class _POSHomePageState extends State<POSHomePage> {
                                       ),
                                       Text(
                                         "₦${formatNumber(item['amount'])}",
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                             color: Colors.black,
                                             fontSize: 20,
                                             fontWeight: FontWeight.bold),
@@ -811,20 +813,20 @@ class _POSHomePageState extends State<POSHomePage> {
                   );
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Column(
                 crossAxisAlignment:
                     CrossAxisAlignment.start, // Align children to the left
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     'Order Summary',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   _buildGroupedSection([
                     _buildSummaryItem('Subtotal',
                         '₦${formatNumber(cart.fold<num>(0, (sum, item) => sum + (item['amount'] ?? 0)))}'),
@@ -835,11 +837,11 @@ class _POSHomePageState extends State<POSHomePage> {
                     _buildSummaryItem('Payment method', selectedPaymentMethod,
                         onTap: () => _showPaymentOptions(context)),
                   ]),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
+                      const Text(
                         'Customer Data',
                         style: TextStyle(
                           fontSize: 20,
@@ -849,26 +851,26 @@ class _POSHomePageState extends State<POSHomePage> {
                       Row(
                         children: [
                           IconButton(
-                            icon: Icon(Icons.sync),
+                            icon: const Icon(Icons.sync),
                             onPressed: () {
                               _fetchCustomer(); // Show add customer dialog
                             },
                           ),
                           IconButton(
-                            icon: Icon(Icons.person_remove),
+                            icon: const Icon(Icons.person_remove),
                             onPressed: () {
                               _noCustomerName(); // Show add customer dialog
                             },
                           ),
                           IconButton(
-                            icon: Icon(Icons.person_add),
+                            icon: const Icon(Icons.person_add),
                             onPressed: () {
                               _showAddCustomerModal(
                                   context); // Show add customer dialog
                             },
                           ),
                           IconButton(
-                            icon: Icon(Icons.person_search),
+                            icon: const Icon(Icons.person_search),
                             onPressed: () {
                               Navigator.push(
                                 context,
@@ -884,27 +886,27 @@ class _POSHomePageState extends State<POSHomePage> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   _buildGroupedSection(
                     [
                       _buildSummaryItem('Name', name),
                       _buildSummaryItem('Phone Number', phone),
                     ],
                   ),
-                  SizedBox(height: 20),
-                  Container(
+                  const SizedBox(height: 20),
+                  SizedBox(
                     width: double.infinity, // Expand to full width
                     child: ElevatedButton(
                       onPressed: checkout,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primaryColor, // Background color
-                        padding: EdgeInsets.symmetric(vertical: 15),
+                        padding: const EdgeInsets.symmetric(vertical: 15),
                         shape: RoundedRectangleBorder(
                           borderRadius:
                               BorderRadius.circular(8), // Rounded corners
                         ),
                       ),
-                      child: Text(
+                      child: const Text(
                         'Complete Transaction',
                         style: TextStyle(
                           fontSize: 18,
@@ -913,7 +915,7 @@ class _POSHomePageState extends State<POSHomePage> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 30),
+                  const SizedBox(height: 30),
                 ],
               ),
             ],
@@ -939,26 +941,26 @@ class _POSHomePageState extends State<POSHomePage> {
       context: context,
       builder: (context) {
         return Dialog(
-          shape: RoundedRectangleBorder(
+          shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.vertical(
                 top: Radius.circular(16)), // Rounded top corners
           ),
           child: SingleChildScrollView(
             child: Padding(
-              padding: EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
+                      const Text(
                         'Add Customer',
                         style: TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                       IconButton(
-                        icon: Icon(Icons.close),
+                        icon: const Icon(Icons.close),
                         onPressed: () {
                           Navigator.of(context).pop(); // Close modal
                         },
@@ -968,20 +970,20 @@ class _POSHomePageState extends State<POSHomePage> {
                   ),
                   TextField(
                     controller: nameController,
-                    decoration: InputDecoration(labelText: 'Name'),
+                    decoration: const InputDecoration(labelText: 'Name'),
                     onChanged: (value) {
                       name = value;
                     },
                   ),
                   TextField(
                     controller: phoneController,
-                    decoration: InputDecoration(labelText: 'Phone Number'),
+                    decoration: const InputDecoration(labelText: 'Phone Number'),
                     keyboardType: TextInputType.number,
                     onChanged: (value) {
                       phone = value;
                     },
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -990,7 +992,7 @@ class _POSHomePageState extends State<POSHomePage> {
                           Navigator.of(context)
                               .pop(); // Close modal without saving
                         },
-                        child: Text('Cancel'),
+                        child: const Text('Cancel'),
                       ),
                       TextButton(
                         onPressed: () {
@@ -1004,7 +1006,7 @@ class _POSHomePageState extends State<POSHomePage> {
                           });
                           Navigator.of(context).pop();
                         },
-                        child: Text('Add Customer'),
+                        child: const Text('Add Customer'),
                       ),
                     ],
                   ),
@@ -1072,7 +1074,7 @@ class _POSHomePageState extends State<POSHomePage> {
                 ),
               ),
               if (title.toLowerCase() == 'payment method')
-                Icon(Icons.arrow_drop_down, color: Colors.blue),
+                const Icon(Icons.arrow_drop_down, color: Colors.blue),
             ],
           ),
         ],
@@ -1095,23 +1097,23 @@ class _POSHomePageState extends State<POSHomePage> {
   void _showPaymentOptions(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (BuildContext context) {
         return Container(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              Text(
+              const Text(
                 'Select Payment Method',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              Divider(),
+              const Divider(),
               ...payments.map<Widget>((payment) {
                 return _buildPaymentOption(
                     context, payment['title'], payment['id']);
-              }).toList(),
+              }),
             ],
           ),
         );
@@ -1123,7 +1125,7 @@ class _POSHomePageState extends State<POSHomePage> {
   Widget _buildPaymentOption(
       BuildContext context, String method, String payId) {
     return ListTile(
-      title: Text(method, style: TextStyle(fontSize: 16)),
+      title: Text(method, style: const TextStyle(fontSize: 16)),
       onTap: () {
         setState(() {
           selectedPaymentMethod = method; // Update selected method
@@ -1153,7 +1155,7 @@ class ProductSearch extends SearchDelegate<Map<String, dynamic>> {
   List<Widget> buildActions(BuildContext context) {
     return [
       IconButton(
-        icon: Icon(Icons.close),
+        icon: const Icon(Icons.close),
         onPressed: () {
           query = '';
           close(context, {});
@@ -1165,7 +1167,7 @@ class ProductSearch extends SearchDelegate<Map<String, dynamic>> {
   @override
   Widget buildLeading(BuildContext context) {
     return IconButton(
-      icon: Icon(Icons.arrow_back),
+      icon: const Icon(Icons.arrow_back),
       onPressed: () {
         close(context, {});
       },
@@ -1187,7 +1189,7 @@ class ProductSearch extends SearchDelegate<Map<String, dynamic>> {
           leading: product['localImagePath'] != null
               ? Image.file(File(product['localImagePath']),
                   width: 150, height: 150, fit: BoxFit.cover)
-              : Icon(Icons.image_not_supported, size: 120, color: Colors.grey),
+              : const Icon(Icons.image_not_supported, size: 120, color: Colors.grey),
           title: Text(product['title']),
           subtitle: Text("Price: ${product['price']}"),
           trailing: ElevatedButton(
@@ -1197,7 +1199,7 @@ class ProductSearch extends SearchDelegate<Map<String, dynamic>> {
               //    .unfocus(); // Unfocus to dismiss the keyboard
               close(context, product);
             },
-            child: Text("Add"),
+            child: const Text("Add"),
           ),
         );
       },
@@ -1218,7 +1220,7 @@ class ProductSearch extends SearchDelegate<Map<String, dynamic>> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text("Close on Add:", style: TextStyle(fontSize: 16)),
+            const Text("Close on Add:", style: TextStyle(fontSize: 16)),
             Switch(
               value: _shouldClose,
               onChanged: (value) {
@@ -1245,7 +1247,7 @@ class ProductSearch extends SearchDelegate<Map<String, dynamic>> {
                       height: 70,
                       fit: BoxFit.cover,
                     )
-                  : Icon(Icons.image_not_supported,
+                  : const Icon(Icons.image_not_supported,
                       size: 70, color: Colors.grey),
               title: Text(product['title']),
               subtitle: Text("Price: ₦${formatNumber(product['price'])}"),
@@ -1260,7 +1262,7 @@ class ProductSearch extends SearchDelegate<Map<String, dynamic>> {
                         }
                       },
                 style: ElevatedButton.styleFrom(
-                  side: BorderSide(color: Colors.grey, width: 1),
+                  side: const BorderSide(color: Colors.grey, width: 1),
                   backgroundColor: isInCart
                       ? Colors.green
                       : Colors.white, // Highlight if in cart
@@ -1282,7 +1284,7 @@ class CustomerSearchPage extends StatefulWidget {
   final String newPhone;
   final Function addName;
 
-  CustomerSearchPage({
+  const CustomerSearchPage({super.key, 
     required this.newName,
     required this.newPhone,
     required this.addName,
@@ -1330,62 +1332,92 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Search Customer'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              decoration: InputDecoration(
-                labelText: 'Enter Customer Name or Phone',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(18.0),
-                ),
+  return Scaffold(
+    appBar: AppBar(
+      title: const Text('Search Customer'),
+    ),
+    body: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          TextField(
+            decoration: InputDecoration(
+              labelText: 'Enter Customer Name or Phone',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(18.0),
               ),
-              onChanged: _filterCustomers,
             ),
-            SizedBox(height: 20),
-            Expanded(
-              child: filteredCustomers.isNotEmpty
-                  ? ListView.builder(
-                      itemCount: filteredCustomers.length,
-                      itemBuilder: (context, index) {
-                        final customer = filteredCustomers[index];
-                        return ListTile(
-                          title: Text(customer['name']!,
-                              style: TextStyle(fontSize: 16)),
-                          trailing: Text(
-                            customer['phone']!,
-                            style: TextStyle(fontSize: 16),
-                          ),
-                          onTap: () {
-                            // Handle customer selection
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                    'Customer Selected: ${customer['name']}, ${customer['phone']}'),
-                                duration: Duration(seconds: 2),
-                              ),
-                            );
+            onChanged: _filterCustomers,
+          ),
+          const SizedBox(height: 20),
+          Expanded(
+            child: filteredCustomers.isNotEmpty
+                ? ListView.builder(
+                    itemCount: filteredCustomers.length,
+                    itemBuilder: (context, index) {
+                      final customer = filteredCustomers[index];
+                      final initial = customer['name']!.isNotEmpty
+                          ? customer['name']![0].toUpperCase()
+                          : '';
 
-                            widget.addName(customer['name'], customer['phone']);
-                            Navigator.of(context)
-                                .pop(); // Close modal on selection
-                          },
-                        );
-                      },
-                    )
-                  : Center(
-                      child: Text('No customers found',
-                          style: TextStyle(color: Colors.grey)),
+                      return Column(
+                        children: [
+                          ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: Container(
+                              width: 40,
+                              height: 40,
+                              decoration: const BoxDecoration(
+                                color: Colors.grey,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  initial,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            title: Text(
+                              customer['name']!,
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            trailing: Text(
+                              customer['phone']!,
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            onTap: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                      'Customer Selected: ${customer['name']}, ${customer['phone']}'),
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              );
+
+                              widget.addName(customer['name'], customer['phone']);
+                              Navigator.of(context).pop(); // Close modal
+                            },
+                          ),
+                          const Divider(height: 1.0),
+                        ],
+                      );
+                    },
+                  )
+                : const Center(
+                    child: Text(
+                      'No customers found',
+                      style: TextStyle(color: Colors.grey),
                     ),
-            ),
-          ],
-        ),
+                  ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
 }

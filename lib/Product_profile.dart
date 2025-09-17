@@ -12,10 +12,10 @@ class ProductProfilePage extends StatefulWidget {
   final List<String> availableCategories;
 
   const ProductProfilePage({
-    Key? key,
+    super.key,
     required this.product,
     required this.availableCategories,
-  }) : super(key: key);
+  });
 
   @override
   _ProductProfilePageState createState() => _ProductProfilePageState();
@@ -67,7 +67,7 @@ class _ProductProfilePageState extends State<ProductProfilePage> {
 
     if (productId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: Product ID is not assigned.')),
+        const SnackBar(content: Text('Error: Product ID is not assigned.')),
       );
       return; // Exit if product ID is not valid
     }
@@ -86,11 +86,11 @@ class _ProductProfilePageState extends State<ProductProfilePage> {
       );
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Image updated successfully!')),
+        const SnackBar(content: Text('Image updated successfully!')),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update image.')),
+        const SnackBar(content: Text('Failed to update image.')),
       );
     }
   }
@@ -160,17 +160,17 @@ Future<bool> _uploadImageToApi(File imageFile, String productId) async {
         await prefs.setString(
             'product_${widget.product['id']}', jsonEncode(updatedProduct));
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Product updated successfully.')),
+          const SnackBar(content: Text('Product updated successfully.')),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update product on server.')),
+          const SnackBar(content: Text('Failed to update product on server.')),
         );
       }
     } catch (e) {
       print("Error updating product: $e");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error occurred during update.')),
+        const SnackBar(content: Text('Error occurred during update.')),
       );
     }
   }
@@ -185,7 +185,7 @@ Future<bool> _uploadImageToApi(File imageFile, String productId) async {
           widget.product['title'] ??
               widget.product['name'] ??
               'Product Profile',
-          style: TextStyle(
+          style: const TextStyle(
               fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
         ),
         backgroundColor: Colors.deepOrange,
@@ -196,7 +196,7 @@ Future<bool> _uploadImageToApi(File imageFile, String productId) async {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              padding: EdgeInsets.all(10),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: Colors.grey[200],
                 border: Border.all(color: Colors.grey, width: 1),
@@ -220,7 +220,7 @@ Future<bool> _uploadImageToApi(File imageFile, String productId) async {
               height: 100,
               width: 100,
               color: Colors.grey[300],
-              child: Icon(Icons.image,
+              child: const Icon(Icons.image,
                   size: 50, color: Colors.grey),
             ),
     ),
@@ -232,7 +232,7 @@ Future<bool> _uploadImageToApi(File imageFile, String productId) async {
         height: 40,
         child: IconButton(
           padding: EdgeInsets.zero,
-          icon: Icon(Icons.add_circle,
+          icon: const Icon(Icons.add_circle,
               size: 40, color: Colors.white),
           onPressed: () => _editImage(context),
         ),
@@ -240,23 +240,23 @@ Future<bool> _uploadImageToApi(File imageFile, String productId) async {
     ),
   ],
 ),            
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           widget.product['title'] ?? 'No Title',
-                          style: TextStyle(
+                          style: const TextStyle(
                               fontSize: 20, fontWeight: FontWeight.bold),
                         ),
                         Text(
                           'Category: ${widget.product['category'] ?? 'N/A'}',
-                          style: TextStyle(fontSize: 16, color: Colors.black),
+                          style: const TextStyle(fontSize: 16, color: Colors.black),
                         ),
                         Text(
                           'Price: ₦${widget.product['price']?.toString() ?? 'N/A'}',
-                          style: TextStyle(fontSize: 16, color: Colors.black),
+                          style: const TextStyle(fontSize: 16, color: Colors.black),
                         ),
                       ],
                     ),
@@ -266,7 +266,7 @@ Future<bool> _uploadImageToApi(File imageFile, String productId) async {
             ),
 
 
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Container(
               decoration: BoxDecoration(
                 color: Colors.grey[200], // Grey background
@@ -277,7 +277,7 @@ Future<bool> _uploadImageToApi(File imageFile, String productId) async {
                 title:
                     Text('Product Name: ${widget.product['title'] ?? 'N/A'}'),
                 trailing: IconButton(
-                  icon: Icon(Icons.edit),
+                  icon: const Icon(Icons.edit),
                   onPressed: () {
                     nameController.text =
                         widget.product['title'] ?? ''; // Set current name
@@ -285,11 +285,11 @@ Future<bool> _uploadImageToApi(File imageFile, String productId) async {
                       context: context,
                       builder: (context) {
                         return AlertDialog(
-                          title: Text('Edit Name'),
+                          title: const Text('Edit Name'),
                           content: TextField(
                             controller: nameController,
                             decoration:
-                                InputDecoration(hintText: "Enter new name"),
+                                const InputDecoration(hintText: "Enter new name"),
                           ),
                           actions: [
                             TextButton(
@@ -305,7 +305,7 @@ Future<bool> _uploadImageToApi(File imageFile, String productId) async {
                                 Navigator.of(context)
                                     .pop(); // Close modal either way
                               },
-                              child: Text('Update'),
+                              child: const Text('Update'),
                             ),
                           ],
                         );
@@ -315,7 +315,7 @@ Future<bool> _uploadImageToApi(File imageFile, String productId) async {
                 ),
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Container(
               decoration: BoxDecoration(
                 color: Colors.grey[200], // Grey background
@@ -326,7 +326,7 @@ Future<bool> _uploadImageToApi(File imageFile, String productId) async {
                 title: Text(
                     'Product Price: ₦${widget.product['price']?.toString() ?? 'N/A'}'),
                 trailing: IconButton(
-                  icon: Icon(Icons.edit),
+                  icon: const Icon(Icons.edit),
                   onPressed: () {
                     priceController.text =
                         widget.product['price']?.toString() ??
@@ -335,11 +335,11 @@ Future<bool> _uploadImageToApi(File imageFile, String productId) async {
                       context: context,
                       builder: (context) {
                         return AlertDialog(
-                          title: Text('Edit Price'),
+                          title: const Text('Edit Price'),
                           content: TextField(
                             controller: priceController,
                             decoration:
-                                InputDecoration(hintText: "Enter new price"),
+                                const InputDecoration(hintText: "Enter new price"),
                             keyboardType: TextInputType.number,
                           ),
                           actions: [
@@ -358,7 +358,7 @@ Future<bool> _uploadImageToApi(File imageFile, String productId) async {
                                 }
                                 Navigator.of(context).pop();
                               },
-                              child: Text('Update'),
+                              child: const Text('Update'),
                             ),
                           ],
                         );
@@ -368,7 +368,7 @@ Future<bool> _uploadImageToApi(File imageFile, String productId) async {
                 ),
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Container(
               decoration: BoxDecoration(
                 color: Colors.grey[200], // Grey background
@@ -379,7 +379,7 @@ Future<bool> _uploadImageToApi(File imageFile, String productId) async {
                 title: Text(
                     'Product Category: ${widget.product['category'] ?? 'N/A'}'),
                 trailing: IconButton(
-                  icon: Icon(Icons.edit),
+                  icon: const Icon(Icons.edit),
                   onPressed: () {
                     selectedCategory = widget
                         .product['category']; // Pre-fill with current category
@@ -387,12 +387,12 @@ Future<bool> _uploadImageToApi(File imageFile, String productId) async {
                       context: context,
                       builder: (context) {
                         return AlertDialog(
-                          title: Text('Edit Category'),
+                          title: const Text('Edit Category'),
                           content: widget.availableCategories.isEmpty
-                              ? Text("No categories available")
+                              ? const Text("No categories available")
                               : DropdownButtonFormField<String>(
                                   value: selectedCategory,
-                                  decoration: InputDecoration(
+                                  decoration: const InputDecoration(
                                     labelText: 'Category',
                                     border: OutlineInputBorder(),
                                   ),
@@ -423,7 +423,7 @@ Future<bool> _uploadImageToApi(File imageFile, String productId) async {
                                 }
                                 Navigator.of(context).pop();
                               },
-                              child: Text('Update'),
+                              child: const Text('Update'),
                             ),
                           ],
                         );

@@ -5,7 +5,7 @@ import 'constants.dart';
 class DetailScreen extends StatelessWidget {
   final Map<String, dynamic> item;
 
-  DetailScreen({required this.item});
+  const DetailScreen({super.key, required this.item});
 
   @override
   Widget build(BuildContext context) {
@@ -26,30 +26,30 @@ class DetailScreen extends StatelessWidget {
                 height: 250,
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Text(
               item['title'],
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Text(
               "₦${item['price']}",
-              style: TextStyle(fontSize: 20, color: Colors.green),
+              style: const TextStyle(fontSize: 20, color: Colors.green),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Text(
               item['description'] ?? "No description available.",
-              style: TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 16),
             ),
-            Spacer(),
+            const Spacer(),
             Center(
               child: ElevatedButton(
                 onPressed: () {},
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryColor,
-                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                 ),
-                child: Text("Add to Cart"),
+                child: const Text("Add to Cart"),
               ),
             ),
           ],

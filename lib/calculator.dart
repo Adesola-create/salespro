@@ -4,7 +4,7 @@ import 'package:math_expressions/math_expressions.dart';
 
 
 class CalculatorScreen extends StatefulWidget {
-  const CalculatorScreen({Key? key}) : super(key: key);
+  const CalculatorScreen({super.key});
 
   @override
   State<CalculatorScreen> createState() => _CalculatorScreenState();
@@ -107,9 +107,9 @@ Widget _buildButton(String label, Color color, {double fontSize = 26}) {
             flex: 5,
             child: Container(
               padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Colors.white,
-                borderRadius: const BorderRadius.only(
+                borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(25),
                   topRight: Radius.circular(25),
                 ),
@@ -126,15 +126,15 @@ Widget _buildButton(String label, Color color, {double fontSize = 26}) {
                   _buildButton('7', Colors.grey[800]!),
                   _buildButton('8', Colors.grey[800]!),
                   _buildButton('9', Colors.grey[800]!),
-                  _buildButton('×', Color.fromARGB(255, 8, 63, 165)),
+                  _buildButton('×', const Color.fromARGB(255, 8, 63, 165)),
                   _buildButton('4', Colors.grey[800]!),
                   _buildButton('5', Colors.grey[800]!),
                   _buildButton('6', Colors.grey[800]!),
-                  _buildButton('-', Color.fromARGB(255, 8, 63, 165)),
+                  _buildButton('-', const Color.fromARGB(255, 8, 63, 165)),
                   _buildButton('1', Colors.grey[800]!),
                   _buildButton('2', Colors.grey[800]!),
                   _buildButton('3', Colors.grey[800]!),
-                  _buildButton('+', Color.fromARGB(255, 8, 63, 165)),
+                  _buildButton('+', const Color.fromARGB(255, 8, 63, 165)),
                   _buildButton('±', Colors.blue),
                   _buildButton('0', Colors.grey[800]!),
                   _buildButton('.', Colors.grey[800]!),
